@@ -43,6 +43,7 @@
   --up-bg:#E1EADD;
   --alert:#E39C9C;
 
+  --detalhe:url("data:image/svg+xml,%3Csvg width=%2235%22 height=%2235%22 viewBox=%220 0 35 35%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%3E%3Cpath d=%22M17.4999 17.5L14.5927 31.432C14.2057 33.2727 15.6121 35 17.4999 35C19.3783 35 20.7847 33.2727 20.4072 31.432L17.4999 17.5Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.5 17.5L25.2967 29.4026C26.3255 30.979 28.5437 31.2055 29.8746 29.8746C31.2055 28.5437 30.979 26.3255 29.4026 25.2967L17.5 17.5Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.5 17.501L31.432 20.4083C33.2727 20.7953 35 19.3888 35 17.501C35 15.6227 33.2727 14.2162 31.432 14.5938L17.5 17.501Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.5 17.4995L29.4026 9.70287C30.979 8.67401 31.2055 6.45583 29.8746 5.12493C28.5437 3.79402 26.3255 4.02056 25.2967 5.59688L17.5 17.4995Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.5001 17.5L20.4073 3.56796C20.7943 1.72735 19.3879 0 17.5001 0C15.6217 0 14.2153 1.72735 14.5928 3.56796L17.5001 17.5Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.4999 17.4995L9.70323 5.59688C8.67438 4.02056 6.4562 3.79402 5.12529 5.12493C3.79439 6.45583 4.02092 8.67401 5.59725 9.70287L17.4999 17.4995Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.5 17.5004L3.56796 14.5932C1.72735 14.2062 0 15.6126 0 17.5004C0 19.3788 1.72735 20.7852 3.56796 20.4077L17.5 17.5004Z%22 fill=%22%231C1412%22/%3E%3Cpath d=%22M17.4999 17.5L5.59725 25.2967C4.02092 26.3255 3.79439 28.5437 5.12529 29.8746C6.4562 31.2055 8.67438 30.979 9.70323 29.4026L17.4999 17.5Z%22 fill=%22%231C1412%22/%3E%3C/g%3E%3C/svg%3E");
   --max:1200px;
   --font:"Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -80,7 +81,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* Tag (pílula com marcador) */
 .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:4px;background:var(--paper);border:1px solid var(--line);color:var(--ink);font:500 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
-.tag::before{content:"";width:6px;height:6px;background:var(--wine);transform:rotate(45deg);border-radius:1px;flex:none}
+.tag::before{content:"";width:9px;height:9px;background:var(--wine);-webkit-mask:var(--detalhe) center/contain no-repeat;mask:var(--detalhe) center/contain no-repeat;flex:none}
 .dark .tag,.final .tag{background:var(--on-dark);border-color:transparent}
 
 /* Botões */
@@ -138,7 +139,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hero .cta-group{margin-top:6px}
 .trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:4px;font:500 11px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
 .trust li{display:inline-flex;align-items:center;gap:8px}
-.trust li::before{content:"";width:5px;height:5px;background:var(--wine);transform:rotate(45deg)}
+.trust li::before{content:"";width:8px;height:8px;background:var(--wine);-webkit-mask:var(--detalhe) center/contain no-repeat;mask:var(--detalhe) center/contain no-repeat;flex:none}
 
 /* Palco do hero: painel + cartões flutuantes */
 .stage{position:relative;width:min(1240px,calc(100% - 32px));margin:clamp(44px,6vw,72px) auto 0;padding-bottom:clamp(56px,8vw,96px)}
