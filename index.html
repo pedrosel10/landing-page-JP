@@ -442,10 +442,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .team{display:grid;gap:clamp(24px,4vw,48px);align-items:center;margin-top:12px;padding:clamp(12px,2vw,16px);border-radius:16px;background:var(--brown-2);border:1px solid var(--line-dark)}
 @media (min-width:900px){.team{grid-template-columns:1fr 1fr}}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.photo{position:relative;display:grid;place-items:end start;aspect-ratio:4/5;padding:12px;border-radius:10px;background:radial-gradient(70% 50% at 50% 30%,rgba(241,236,228,.14),transparent 70%),linear-gradient(180deg,#4A302B,#2A1512);color:var(--on-dark-mute);font:500 9.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.photo{position:relative;margin:0;display:grid;place-items:end start;aspect-ratio:4/5;padding:12px;border-radius:10px;background:radial-gradient(70% 50% at 50% 30%,rgba(241,236,228,.14),transparent 70%),linear-gradient(180deg,#4A302B,#2A1512);color:var(--on-dark-mute);font:500 9.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .photo::before{content:"";position:absolute;left:50%;top:22%;width:34%;aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:rgba(241,236,228,.1)}
 .photo::after{content:"";position:absolute;left:50%;top:48%;width:62%;height:40%;border-radius:50% 50% 0 0;transform:translateX(-50%);background:rgba(241,236,228,.07)}
 .photo span{position:relative;z-index:1}
+.photo.has-img{padding:0;overflow:hidden;background:var(--brown-3)}
+.photo.has-img::before,.photo.has-img::after{content:none}
+.photo img{width:100%;height:100%;object-fit:cover;object-position:center top}
 .team-copy{display:grid;gap:18px;justify-items:start;padding:clamp(8px,2vw,24px)}
 .team-copy p{color:var(--on-dark-mute)}
 .names{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;padding-top:18px;border-top:1px solid var(--line-dark)}
@@ -1052,8 +1055,8 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
     <!-- TROCAR: fotos reais dos sócios, nomes e funções -->
     <div class="team reveal">
       <div class="photos">
-        <figure class="photo"><span>Foto real · Sócio 01</span></figure>
-        <figure class="photo"><span>Foto real · Sócio 02</span></figure>
+        <figure class="photo has-img"><img src="fotos/socio-01.webp" alt="Sócio 01" loading="lazy" decoding="async"></figure>
+        <figure class="photo has-img"><img src="fotos/socio-02.webp" alt="Sócio 02" loading="lazy" decoding="async"></figure>
       </div>
       <div class="team-copy">
         <span class="tag">Quem conduz a operação</span>

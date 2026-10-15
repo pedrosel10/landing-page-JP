@@ -10,3 +10,5 @@ deployment:
     - /bin/mkdir -p ${DEPLOYPATH}logos
     - /bin/cp index.html $DEPLOYPATH
     - /bin/cp logos/*.webp ${DEPLOYPATH}logos/
+    - /bin/mkdir -p ${DEPLOYPATH}fotos
+    - /bin/cp fotos/*.webp ${DEPLOYPATH}fotos/
