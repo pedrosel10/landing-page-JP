@@ -12,3 +12,5 @@ deployment:
     - /bin/cp logos/*.webp ${DEPLOYPATH}logos/
     - /bin/mkdir -p ${DEPLOYPATH}fotos
     - /bin/cp fotos/*.webp ${DEPLOYPATH}fotos/
+    - /bin/mkdir -p ${DEPLOYPATH}marca
+    - /bin/cp marca/*.svg ${DEPLOYPATH}marca/
