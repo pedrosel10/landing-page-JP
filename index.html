@@ -444,6 +444,35 @@ button,input,select,textarea{font:inherit;color:inherit}
 .case-m b{font-size:15px;font-weight:500;letter-spacing:-.02em}
 .case blockquote{padding-top:14px;border-top:1px solid var(--line-dark);font-size:14.5px;line-height:1.5;color:var(--on-dark)}
 .case cite{display:block;margin-top:8px;font-style:normal;font-size:12.5px;color:var(--on-dark-mute)}
+/* Grade de marcas (branding): cards 9:16 que trocam fundo + logo */
+.brands{margin:clamp(64px,8vw,104px) 0 clamp(48px,6vw,72px)}
+.brands-head{display:grid;justify-items:center;gap:18px;margin-bottom:clamp(28px,4vw,40px);text-align:center}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:16px;overflow:hidden;background:#141414;border:1px solid var(--line-dark)}
+@media (min-width:769px){.bgrid{grid-template-columns:repeat(7,1fr)}}
+@media (max-width:768px){.bcard[data-brand="ANDERSON"],.bcard[data-brand="SOBERANA"]{display:none}}
+.bcard{position:relative;aspect-ratio:9/16;overflow:hidden;background:#141414}
+.bslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:0;visibility:hidden;z-index:0}
+.bslide.active{opacity:1;visibility:visible;z-index:2}
+.bslide.is-leaving{opacity:1;visibility:visible;z-index:1}
+.bslide::after{content:"";position:absolute;inset:0;z-index:2;background:#000;opacity:0;pointer-events:none}
+.bslide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
+.bslide-logo{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;width:75%;height:30%;pointer-events:none}
+.bslide-logo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.bcard:hover .bslide-logo img{transform:scale(1.08)}
+.bslide.is-entering{animation:bc-wipe-up .95s cubic-bezier(.77,0,.175,1) both}
+.bcard:nth-child(even) .bslide.is-entering{animation-name:bc-wipe-down}
+.bslide.is-entering .bslide-bg{animation:bc-bg-settle 1.4s cubic-bezier(.16,1,.3,1) both}
+.bslide.is-entering .bslide-logo{animation:bc-logo-in .85s cubic-bezier(.16,1,.3,1) .38s both}
+.bslide.is-leaving .bslide-bg{animation:bc-bg-recede .95s cubic-bezier(.77,0,.175,1) both}
+.bslide.is-leaving::after{animation:bc-veil .95s cubic-bezier(.77,0,.175,1) both}
+.bslide.is-leaving .bslide-logo{animation:bc-logo-out .5s cubic-bezier(.7,0,.84,0) both}
+@keyframes bc-wipe-up{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0)}}
+@keyframes bc-wipe-down{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0)}}
+@keyframes bc-bg-settle{from{transform:scale(1.28)}to{transform:scale(1)}}
+@keyframes bc-bg-recede{from{transform:scale(1)}to{transform:scale(1.12)}}
+@keyframes bc-veil{from{opacity:0}to{opacity:.65}}
+@keyframes bc-logo-in{from{opacity:0;transform:translateY(22px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes bc-logo-out{to{opacity:0;transform:translateY(-16px);filter:blur(4px)}}
 .team{display:grid;gap:clamp(24px,4vw,48px);align-items:center;margin-top:12px;padding:clamp(12px,2vw,16px);border-radius:16px;background:var(--brown-2);border:1px solid var(--line-dark)}
 @media (min-width:900px){.team{grid-template-columns:1fr 1fr}}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1070,6 +1099,142 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       </article>
     </div>
 
+    <!-- Marcas (branding): mesma grade animada do branding_lp. Arquivos em marcas/<marca>/fundo-N.webp + logo-N.svg.
+         Só o 1º slide de cada card carrega com a página; os outros carregam quando a seção se aproxima. -->
+    <div class="brands reveal">
+      <div class="brands-head">
+        <span class="tag">Branding</span>
+        <h3 class="h3">Marcas que <span class="mute">ajudamos a construir.</span></h3>
+      </div>
+      <div class="bgrid" aria-label="Marcas criadas pela equipe">
+          <div class="bcard" data-brand="DOLCE">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/dolce/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/dolce/logo-1.svg" alt="DOLCE" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/dolce/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/dolce/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/dolce/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/dolce/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/dolce/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/dolce/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/dolce/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/dolce/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/dolce/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/dolce/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="ARACRUZ">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/aracruz/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/aracruz/logo-1.svg" alt="ARACRUZ" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/aracruz/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/aracruz/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/aracruz/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/aracruz/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/aracruz/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/aracruz/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/aracruz/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/aracruz/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/aracruz/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/aracruz/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="JANEDSON">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/janedson/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/janedson/logo-1.svg" alt="JANEDSON" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/janedson/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/janedson/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/janedson/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/janedson/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/janedson/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/janedson/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/janedson/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/janedson/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/janedson/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/janedson/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="TELORA">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/telora/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/telora/logo-1.svg" alt="TELORA" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-7.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-8.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-8.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/telora/fundo-9.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/telora/logo-9.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="MONCAO">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/moncao/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/moncao/logo-1.svg" alt="MONCAO" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/moncao/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/moncao/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/moncao/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/moncao/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/moncao/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/moncao/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/moncao/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/moncao/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/moncao/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/moncao/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="VITANOVA">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/vitanova/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/vitanova/logo-1.svg" alt="VITANOVA" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/vitanova/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/vitanova/logo-7.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="360">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/360/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/360/logo-1.svg" alt="360" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/360/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/360/logo-7.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="LISO">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/liso/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/liso/logo-1.svg" alt="LISO" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/liso/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/liso/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/liso/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/liso/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/liso/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/liso/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/liso/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/liso/logo-5.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="GREEN">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/green/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/green/logo-1.svg" alt="GREEN" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-7.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/green/fundo-8.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/green/logo-8.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="QUERUBINI">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/querubini/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/querubini/logo-1.svg" alt="QUERUBINI" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/querubini/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/querubini/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/querubini/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/querubini/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/querubini/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/querubini/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/querubini/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/querubini/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/querubini/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/querubini/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="PISTACCHIO">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/pistacchio/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/pistacchio/logo-1.svg" alt="PISTACCHIO" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-7.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-8.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-8.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/pistacchio/fundo-9.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/pistacchio/logo-9.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="ANDERSON">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/anderson/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/anderson/logo-1.svg" alt="ANDERSON" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/anderson/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/anderson/logo-7.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="JP">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/jp/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/jp/logo-1.svg" alt="JP" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-6.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-7.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-7.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-8.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-8.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/jp/fundo-9.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/jp/logo-9.svg" alt="" decoding="async"></div></div>
+          </div>
+          <div class="bcard" data-brand="SOBERANA">
+            <div class="bslide active"><img class="bslide-bg" src="marcas/soberana/fundo-1.webp" alt="" width="400" height="711" loading="lazy" decoding="async"><div class="bslide-logo"><img src="marcas/soberana/logo-1.svg" alt="SOBERANA" loading="lazy" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/soberana/fundo-2.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/soberana/logo-2.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/soberana/fundo-3.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/soberana/logo-3.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/soberana/fundo-4.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/soberana/logo-4.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/soberana/fundo-5.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/soberana/logo-5.svg" alt="" decoding="async"></div></div>
+            <div class="bslide"><img class="bslide-bg" data-src="marcas/soberana/fundo-6.webp" alt="" width="400" height="711" decoding="async"><div class="bslide-logo"><img data-src="marcas/soberana/logo-6.svg" alt="" decoding="async"></div></div>
+          </div>
+      </div>
+    </div>
+
     <!-- TROCAR: fotos reais dos sócios, nomes e funções -->
     <div class="team reveal">
       <div class="photos">
@@ -1448,6 +1613,53 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
       resizeTimer = setTimeout(() => { if (marquee.clientWidth !== lastWidth) buildMarquee(); }, 200);
     });
     reduceMotion.addEventListener('change', buildMarquee);
+  }
+
+  /* Grade de marcas: cada card troca de fundo + logo a cada 2,8s.
+     Cards ímpares e pares se alternam (meio ciclo de diferença), como no branding_lp.
+     As imagens dos próximos slides só carregam perto da seção, e a troca pausa fora da tela. */
+  const brandGrid = $('.bgrid');
+  if (brandGrid) {
+    const brandCards = $$('.bcard', brandGrid);
+    const INTERVAL = 2800;
+    const state = new Map(brandCards.map(c => [c, 0]));
+    const groups = [brandCards.filter((_, i) => i % 2 === 0), brandCards.filter((_, i) => i % 2 === 1)];
+    let loaded = false, timers = [];
+
+    const loadAll = () => {
+      if (loaded) return;
+      loaded = true;
+      $$('img[data-src]', brandGrid).forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+    };
+
+    const advance = group => group.forEach(card => {
+      if (card.offsetParent === null) return; // card escondido no mobile
+      const slides = $$('.bslide', card);
+      const cur = state.get(card), next = (cur + 1) % slides.length;
+      const nextBg = $('.bslide-bg', slides[next]);
+      if (!nextBg.getAttribute('src') || !nextBg.complete) return; // ainda carregando: espera a próxima volta
+      slides.forEach(sl => { if (sl !== slides[cur]) sl.classList.remove('is-leaving'); });
+      slides[cur].classList.remove('active', 'is-entering');
+      slides[cur].classList.add('is-leaving');
+      slides[next].classList.remove('is-leaving');
+      slides[next].classList.add('active', 'is-entering');
+      state.set(card, next);
+    });
+
+    const start = () => {
+      if (timers.length || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      timers.push(setInterval(() => advance(groups[0]), INTERVAL));
+      timers.push(setTimeout(() => timers.push(setInterval(() => advance(groups[1]), INTERVAL)), INTERVAL / 2));
+    };
+    const stop = () => { timers.forEach(t => { clearInterval(t); clearTimeout(t); }); timers = []; };
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => { if (e.isIntersecting) loadAll(); }, { rootMargin: '800px 0px' }).observe(brandGrid);
+      new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }).observe(brandGrid);
+    } else {
+      loadAll();
+      start();
+    }
   }
 
   /* Ano no rodapé */

@@ -14,3 +14,4 @@ deployment:
     - /bin/cp fotos/*.webp ${DEPLOYPATH}fotos/
     - /bin/mkdir -p ${DEPLOYPATH}marca
     - /bin/cp marca/*.svg ${DEPLOYPATH}marca/
+    - /bin/cp -R marcas $DEPLOYPATH
