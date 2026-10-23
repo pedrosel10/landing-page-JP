@@ -70,6 +70,19 @@ $lead = [
     'utm_term'       => crm_texto($dados['utm_term'] ?? '', 200),
 ];
 
+/* Clique do anúncio (para devolver as conversões à Meta e ao Google) */
+$clique = function ($valor, string $padrao) {
+    $valor = crm_texto($valor, 500);
+    return preg_match($padrao, $valor) ? $valor : '';
+};
+$lead['fbc']    = $clique($dados['fbc'] ?? '', '/^fb\.\d\.\d{10,13}\.[\w\-.]{10,400}$/');
+$lead['fbp']    = $clique($dados['fbp'] ?? '', '/^fb\.\d\.\d{10,13}\.\d{5,25}$/');
+$lead['gclid']  = $clique($dados['gclid'] ?? '', '/^[\w\-]{10,300}$/');
+$lead['gbraid'] = $clique($dados['gbraid'] ?? '', '/^[\w\-]{10,300}$/');
+$lead['wbraid'] = $clique($dados['wbraid'] ?? '', '/^[\w\-]{10,300}$/');
+$lead['ip']         = substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+$lead['user_agent'] = crm_texto($_SERVER['HTTP_USER_AGENT'] ?? '', 400);
+
 /* Validação: mesmos campos obrigatórios do formulário */
 $erros = [];
 foreach (['nome', 'whatsapp', 'email', 'empresa', 'site_instagram'] as $campo) {
@@ -101,14 +114,24 @@ if ($erros) {
     responder(422, ['ok' => false, 'erro' => 'validacao', 'campos' => array_values(array_unique($erros))]);
 }
 
-/* O perfil é recalculado aqui: não confiamos no que veio do navegador */
+/* Perfil, pontuação e qualificação calculados aqui: não confiamos no navegador */
 $lead['perfil'] = in_array($lead['investimento'], CRM_INVESTIMENTO_COMPATIVEL, true) ? 'compativel' : 'abaixo_do_perfil';
-$lead['criado_em'] = $lead['atualizado_em'] = crm_agora();
+$lead['criado_em'] = $lead['atualizado_em'] = $lead['etapa_desde'] = crm_agora();
+$pontos = crm_pontuar($lead);
+$lead['pontuacao'] = $pontos['total'];
+$lead['classe'] = $pontos['classe'];
+$lead['qualificacao'] = crm_calcular_qualificacao($lead);
+$lead['mql_em'] = $lead['qualificacao'] === 'mql' ? $lead['criado_em'] : null;
 
 try {
     $colunas = array_keys($lead);
     $sql = 'INSERT INTO leads (' . implode(', ', $colunas) . ') VALUES (' . implode(', ', array_fill(0, count($colunas), '?')) . ')';
     crm_db()->prepare($sql)->execute(array_values($lead));
+    $novoId = (int) crm_db()->lastInsertId();
+    crm_enfileirar($novoId, 'lead');
+    if ($lead['qualificacao'] === 'mql') {
+        crm_enfileirar($novoId, 'mql');
+    }
     crm_registrar_tentativa('lead', $ip);
     crm_registrar_tentativa('lead', 'geral');
 } catch (Throwable $e) {
@@ -126,4 +149,10 @@ if (CRM_EMAIL_AVISO !== '') {
         "Content-Type: text/plain; charset=UTF-8\r\n");
 }
 
-responder(200, ['ok' => true]);
+/* Responde ao visitante e só depois conversa com a Meta (ele não espera) */
+http_response_code(200);
+echo json_encode(['ok' => true]);
+if (crm_liberar_resposta()) {
+    ignore_user_abort(true);
+    crm_processar_envios(3);
+}

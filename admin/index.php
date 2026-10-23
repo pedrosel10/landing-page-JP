@@ -1,179 +1,191 @@
 <?php
-/* Lista de leads com indicadores, busca e filtros */
+/* Funil de vendas (kanban): uma coluna por etapa, cards arrastáveis */
 
 require __DIR__ . '/../inc/crm.php';
 $usuario = crm_exigir_login();
 $db = crm_db();
 
-/* Novos ainda não abertos por ninguém */
-$naoVistos = $db->query("SELECT id, criado_em, nome, empresa, whatsapp, segmento, investimento, perfil
-    FROM leads WHERE visto_em IS NULL ORDER BY criado_em DESC, id DESC LIMIT 12")->fetchAll();
-$totalNaoVistos = crm_total_nao_vistos();
+$classe = (string) ($_GET['classe'] ?? '');
+$classe = isset(CRM_CLASSES[$classe]) ? $classe : '';
+$busca = crm_texto($_GET['q'] ?? '', 80);
 
-/* ---------- filtros (GET) */
-$busca  = crm_texto($_GET['q'] ?? '', 80);
-$status = (string) ($_GET['status'] ?? '');
-$perfil = (string) ($_GET['perfil'] ?? '');
-$status = isset(CRM_STATUS[$status]) ? $status : '';
-$perfil = in_array($perfil, ['compativel', 'abaixo_do_perfil'], true) ? $perfil : '';
-$pagina = max(1, (int) ($_GET['p'] ?? 1));
-$porPagina = 50;
-
-$where = [];
-$args = [];
+$where = "(status IN ('novo','atendimento','agendada','realizada','proposta') OR (status IN ('ganho','perdido') AND fechado_em >= ?))";
+$args = [date('Y-m-d H:i:s', time() - 30 * 86400)];
+if ($classe !== '') {
+    $where .= ' AND classe = ?';
+    $args[] = $classe;
+}
 if ($busca !== '') {
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $busca) . '%';
-    $where[] = "(nome LIKE ? ESCAPE '\\' OR empresa LIKE ? ESCAPE '\\' OR email LIKE ? ESCAPE '\\' OR whatsapp LIKE ? ESCAPE '\\')";
-    array_push($args, $like, $like, $like, $like);
+    $where .= " AND (nome LIKE ? ESCAPE '\\' OR empresa LIKE ? ESCAPE '\\' OR whatsapp LIKE ? ESCAPE '\\')";
+    array_push($args, $like, $like, $like);
 }
-if ($status !== '') {
-    $where[] = 'status = ?';
-    $args[] = $status;
-}
-if ($perfil !== '') {
-    $where[] = 'perfil = ?';
-    $args[] = $perfil;
-}
-$sqlWhere = $where ? 'WHERE ' . implode(' AND ', $where) : '';
-
-$st = $db->prepare("SELECT COUNT(*) FROM leads $sqlWhere");
+$st = $db->prepare("SELECT * FROM leads WHERE $where");
 $st->execute($args);
-$total = (int) $st->fetchColumn();
-$paginas = max(1, (int) ceil($total / $porPagina));
-$pagina = min($pagina, $paginas);
 
-$st = $db->prepare("SELECT id, criado_em, nome, empresa, whatsapp, email, segmento, investimento, perfil, status, visto_em
-    FROM leads $sqlWhere ORDER BY criado_em DESC, id DESC LIMIT $porPagina OFFSET " . (($pagina - 1) * $porPagina));
-$st->execute($args);
-$leads = $st->fetchAll();
-
-/* Leads não vistos que estão nesta tela: viram "vistos" quando alguém interage
-   com a página (ver assets/admin.js). Os que você marcou como "não visto" ficam de fora. */
-$idsAuto = [];
-foreach (array_merge($naoVistos, $leads) as $l) {
-    if (!array_key_exists('visto_em', $l) || $l['visto_em'] === null) {
-        $idsAuto[(int) $l['id']] = true;
+$colunas = [];
+foreach (CRM_STATUS as $etapa => $nome) {
+    $colunas[$etapa] = [];
+}
+foreach ($st->fetchAll() as $l) {
+    if (isset($colunas[$l['status']])) {
+        $colunas[$l['status']][] = $l;
     }
 }
-$idsAuto = array_values(array_diff(array_keys($idsAuto), $_SESSION['nao_auto'] ?? []));
+/* Ordem dentro da coluna: novos pelos mais recentes; o resto pela próxima ação */
+foreach ($colunas as $etapa => &$cards) {
+    usort($cards, function ($a, $b) use ($etapa) {
+        if ($etapa === 'novo' || $etapa === 'ganho' || $etapa === 'perdido') {
+            return strcmp((string) ($b['fechado_em'] ?: $b['criado_em']), (string) ($a['fechado_em'] ?: $a['criado_em']));
+        }
+        $pa = $a['proxima_acao_em'] ?: '9999';
+        $pb = $b['proxima_acao_em'] ?: '9999';
+        return $pa === $pb ? strcmp((string) $a['etapa_desde'], (string) $b['etapa_desde']) : strcmp($pa, $pb);
+    });
+}
+unset($cards);
 
-/* ---------- indicadores (sempre do total, sem filtro) */
-$inicioMes = (new DateTimeImmutable('first day of this month 00:00', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
-$st = $db->prepare("SELECT
-    COUNT(*) AS total,
-    SUM(status = 'novo') AS novos,
-    SUM(perfil = 'compativel') AS fit,
-    SUM(status IN ('reuniao','proposta')) AS andamento,
-    SUM(status = 'ganho') AS ganhos,
-    SUM(criado_em >= ?) AS mes
-    FROM leads");
-$st->execute([$inicioMes]);
+/* ---------- indicadores dos últimos 30 dias */
+$desde = date('Y-m-d H:i:s', time() - 30 * 86400);
+$st = $db->prepare("SELECT COUNT(*) total,
+    SUM(qualificacao IN ('mql','sql')) mql,
+    SUM(qualificacao = 'sql') sqls,
+    SUM(agendada_em IS NOT NULL) reunioes,
+    SUM(status = 'ganho') vendas,
+    SUM(CASE WHEN status = 'ganho' THEN valor_mensal ELSE 0 END) receita
+    FROM leads WHERE criado_em >= ?");
+$st->execute([$desde]);
 $k = $st->fetch();
-
-function link_filtro(array $mudar): string
+$st = $db->prepare('SELECT criado_em, primeiro_contato_em FROM leads WHERE primeiro_contato_em IS NOT NULL AND criado_em >= ?');
+$st->execute([$desde]);
+$tempos = [];
+foreach ($st->fetchAll() as $t) {
+    $a = strtotime($t['criado_em']);
+    $b = strtotime($t['primeiro_contato_em']);
+    if ($a && $b && $b >= $a) {
+        $tempos[] = $b - $a;
+    }
+}
+sort($tempos);
+$mediana = $tempos ? $tempos[(int) floor(count($tempos) / 2)] : null;
+$semContato = count($colunas['novo']);
+$agora = date('Y-m-d H:i:s');
+$atrasadas = 0;
+foreach (CRM_ETAPAS_ABERTAS as $e) {
+    foreach ($colunas[$e] as $l) {
+        if ($l['proxima_acao_em'] && $l['proxima_acao_em'] < $agora) {
+            $atrasadas++;
+        }
+    }
+}
+function pct($parte, $todo): string
 {
-    $atual = array_filter([
-        'q' => $_GET['q'] ?? '', 'status' => $_GET['status'] ?? '', 'perfil' => $_GET['perfil'] ?? '',
-    ], 'strlen');
-    $novo = array_filter(array_merge($atual, $mudar), fn($v) => $v !== '' && $v !== null);
-    return 'index.php' . ($novo ? '?' . http_build_query($novo) : '');
+    return $todo > 0 ? round($parte / $todo * 100) . '%' : '–';
+}
+function tempo_legivel(?int $seg): string
+{
+    if ($seg === null) {
+        return '–';
+    }
+    if ($seg < 3600) {
+        return max(1, (int) round($seg / 60)) . ' min';
+    }
+    return $seg < 86400 ? round($seg / 3600, 1) . ' h' : round($seg / 86400, 1) . ' dias';
 }
 
-crm_topo('Leads', $usuario);
+$idsNaoVistos = [];
+foreach ($colunas as $cards) {
+    foreach ($cards as $l) {
+        if ($l['visto_em'] === null) {
+            $idsNaoVistos[] = (int) $l['id'];
+        }
+    }
+}
+$idsNaoVistos = array_values(array_diff($idsNaoVistos, $_SESSION['nao_auto'] ?? []));
+
+crm_topo('Funil', $usuario, 'pagina-funil');
 ?>
-<main class="wrap"<?php if ($idsAuto): ?> data-auto-visto data-ids="<?= h(implode(',', $idsAuto)) ?>" data-csrf="<?= h(crm_csrf()) ?>"<?php endif; ?>>
-  <div class="cabeca">
-    <div>
-      <h1>Leads</h1>
-      <p class="muted">Contatos recebidos pelo formulário da landing page.</p>
+<main class="funil-pagina"<?php if ($idsNaoVistos): ?> data-auto-visto data-ids="<?= h(implode(',', $idsNaoVistos)) ?>" data-csrf="<?= h(crm_csrf()) ?>"<?php endif; ?>>
+  <div class="wrap">
+    <div class="cabeca">
+      <div>
+        <h1>Funil de vendas</h1>
+        <p class="muted">Arraste os cards entre as etapas ou abra o lead para atualizar.</p>
+      </div>
+      <form class="funil-filtros" method="get" action="index.php">
+        <input type="search" name="q" value="<?= h($busca) ?>" placeholder="Buscar lead" aria-label="Buscar lead">
+        <select name="classe" aria-label="Classe">
+          <option value="">Todas as classes</option>
+          <?php foreach (CRM_CLASSES as $c => $nome): ?>
+            <option value="<?= h($c) ?>"<?= $classe === $c ? ' selected' : '' ?>><?= h($c . ' · ' . $nome) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <button class="btn btn-escuro" type="submit">Filtrar</button>
+        <?php if ($classe !== '' || $busca !== ''): ?><a class="limpar" href="index.php">Limpar</a><?php endif; ?>
+      </form>
     </div>
-    <a class="btn btn-claro" href="exportar.php">Exportar CSV</a>
+
+    <section class="kpis kpis-6" aria-label="Indicadores dos últimos 30 dias">
+      <div class="kpi"><span>Leads · 30 dias</span><b><?= (int) $k['total'] ?></b><small>recebidos</small></div>
+      <div class="kpi"><span>MQL</span><b><?= (int) $k['mql'] ?></b><small><?= pct($k['mql'], $k['total']) ?> dos leads</small></div>
+      <div class="kpi"><span>SQL</span><b><?= (int) $k['sqls'] ?></b><small><?= pct($k['sqls'], $k['mql']) ?> dos MQL</small></div>
+      <div class="kpi"><span>Reuniões</span><b><?= (int) $k['reunioes'] ?></b><small>agendadas</small></div>
+      <div class="kpi kpi-destaque"><span>Vendas</span><b><?= (int) $k['vendas'] ?></b><small>R$ <?= number_format((float) $k['receita'], 0, ',', '.') ?>/mês</small></div>
+      <div class="kpi"><span>1º contato</span><b><?= h(tempo_legivel($mediana)) ?></b><small>tempo mediano</small></div>
+    </section>
+
+    <?php if ($semContato || $atrasadas): ?>
+      <div class="alertas-funil">
+        <?php if ($semContato): ?><span class="alerta-chip alerta-chip-forte"><?= $semContato ?> lead<?= $semContato > 1 ? 's' : '' ?> aguardando o 1º contato</span><?php endif; ?>
+        <?php if ($atrasadas): ?><span class="alerta-chip"><?= $atrasadas === 1 ? '1 próxima ação atrasada' : $atrasadas . ' próximas ações atrasadas' ?></span><?php endif; ?>
+      </div>
+    <?php endif; ?>
   </div>
 
-  <?php if ($naoVistos): ?>
-  <section class="naovistos" aria-label="Novos ainda não vistos">
-    <div class="naovistos-cab">
-      <h2><span class="ponto"></span>Novos, ainda não vistos <span class="contador"><?= $totalNaoVistos ?></span></h2>
-      <span class="naovistos-dica" data-aviso-visto>Viram “vistos” assim que você mexe na página.</span>
-    </div>
-    <div class="naovistos-grade">
-      <?php foreach ($naoVistos as $n): ?>
-        <a class="nv" href="lead.php?id=<?= (int) $n['id'] ?>">
-          <span class="nv-quando"><?= h(crm_tempo_relativo($n['criado_em'])) ?></span>
-          <b><?= h($n['nome']) ?></b>
-          <small><?= h($n['empresa']) ?></small>
-          <span class="nv-info"><?= h($n['segmento']) ?> · <?= h(CRM_INVESTIMENTO[$n['investimento']] ?? $n['investimento']) ?></span>
-          <span class="nv-rodape"><?= crm_selo_perfil($n['perfil']) ?><span class="nv-abrir">Abrir →</span></span>
-        </a>
-      <?php endforeach; ?>
-    </div>
-    <?php if ($totalNaoVistos > count($naoVistos)): ?><p class="muted">Mostrando os <?= count($naoVistos) ?> mais recentes de <?= $totalNaoVistos ?> não vistos.</p><?php endif; ?>
-  </section>
-  <?php endif; ?>
-
-  <section class="kpis" aria-label="Indicadores">
-    <a class="kpi" href="index.php"><span>Total</span><b><?= (int) $k['total'] ?></b><small><?= (int) $k['mes'] ?> este mês</small></a>
-    <a class="kpi kpi-destaque" href="<?= h(link_filtro(['status' => 'novo', 'p' => null])) ?>"><span>Novos</span><b><?= (int) $k['novos'] ?></b><small>aguardando contato</small></a>
-    <a class="kpi" href="<?= h(link_filtro(['perfil' => 'compativel', 'p' => null])) ?>"><span>No perfil</span><b><?= (int) $k['fit'] ?></b><small>R$ 2 mil+ por mês</small></a>
-    <a class="kpi" href="<?= h(link_filtro(['status' => 'reuniao', 'p' => null])) ?>"><span>Em andamento</span><b><?= (int) $k['andamento'] ?></b><small>reunião ou proposta</small></a>
-    <a class="kpi" href="<?= h(link_filtro(['status' => 'ganho', 'p' => null])) ?>"><span>Fechados</span><b><?= (int) $k['ganhos'] ?></b><small>clientes</small></a>
-  </section>
-
-  <form class="filtros" method="get" action="index.php">
-    <input type="search" name="q" value="<?= h($busca) ?>" placeholder="Buscar por nome, empresa, e-mail ou WhatsApp" aria-label="Buscar">
-    <select name="status" aria-label="Status">
-      <option value="">Todos os status</option>
-      <?php foreach (CRM_STATUS as $valor => $rotulo): ?>
-        <option value="<?= h($valor) ?>"<?= $status === $valor ? ' selected' : '' ?>><?= h($rotulo) ?></option>
-      <?php endforeach; ?>
-    </select>
-    <select name="perfil" aria-label="Perfil">
-      <option value="">Todos os perfis</option>
-      <option value="compativel"<?= $perfil === 'compativel' ? ' selected' : '' ?>>No perfil</option>
-      <option value="abaixo_do_perfil"<?= $perfil === 'abaixo_do_perfil' ? ' selected' : '' ?>>Abaixo do perfil</option>
-    </select>
-    <button type="submit" class="btn btn-escuro">Filtrar</button>
-    <?php if ($busca !== '' || $status !== '' || $perfil !== ''): ?><a class="limpar" href="index.php">Limpar</a><?php endif; ?>
-  </form>
-
-  <?php if (!$leads): ?>
-    <div class="vazio">
-      <?php if ($k['total'] == 0): ?>
-        <b>Nenhum lead ainda.</b><p>Assim que alguém preencher o formulário da landing page, o contato aparece aqui.</p>
-      <?php else: ?>
-        <b>Nenhum lead com esses filtros.</b><p><a href="index.php">Ver todos</a></p>
-      <?php endif; ?>
-    </div>
-  <?php else: ?>
-    <p class="contagem"><?= $total ?> lead<?= $total === 1 ? '' : 's' ?><?= $sqlWhere ? ' encontrados' : '' ?></p>
-    <div class="tabela" role="table" aria-label="Leads">
-      <div class="linha linha-cab" role="row">
-        <span role="columnheader">Recebido</span><span role="columnheader">Lead</span><span role="columnheader">Segmento</span>
-        <span role="columnheader">Investimento</span><span role="columnheader">Perfil</span><span role="columnheader">Status</span><span role="columnheader"></span>
-      </div>
-      <?php foreach ($leads as $l): ?>
-        <div class="linha<?= $l['visto_em'] === null ? ' linha-nova' : '' ?>" role="row">
-          <span class="c-data" role="cell"><?= h(crm_data($l['criado_em'])) ?></span>
-          <span class="c-lead" role="cell"><a href="lead.php?id=<?= (int) $l['id'] ?>"><b><?php if ($l['visto_em'] === null): ?><span class="ponto" title="Ainda não visto"></span><?php endif; ?><?= h($l['nome']) ?></b><small><?= h($l['empresa']) ?></small></a></span>
-          <span class="c-seg" role="cell"><?= h($l['segmento']) ?></span>
-          <span class="c-inv" role="cell"><?= h(CRM_INVESTIMENTO[$l['investimento']] ?? $l['investimento']) ?></span>
-          <span role="cell"><?= crm_selo_perfil($l['perfil']) ?></span>
-          <span role="cell"><?= crm_selo_status($l['status']) ?></span>
-          <span class="c-acoes" role="cell">
-            <a class="mini" href="<?= h(crm_link_whatsapp($l['whatsapp'])) ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a class="mini mini-claro" href="lead.php?id=<?= (int) $l['id'] ?>">Abrir</a>
-          </span>
+  <div class="quadro" data-quadro data-csrf="<?= h(crm_csrf()) ?>">
+    <?php foreach ($colunas as $etapa => $cards): ?>
+      <?php $soma = 0; foreach ($cards as $c) { $soma += (float) $c['valor_mensal']; } ?>
+      <section class="coluna coluna-<?= h($etapa) ?>" data-etapa="<?= h($etapa) ?>" aria-label="<?= h(CRM_STATUS[$etapa]) ?>">
+        <header class="coluna-cab" title="<?= h(CRM_ETAPAS_INFO[$etapa]['dica']) ?>">
+          <b><?= h(CRM_STATUS[$etapa]) ?></b>
+          <span class="coluna-qtd" data-qtd><?= count($cards) ?></span>
+          <?php if (($etapa === 'ganho' || $etapa === 'proposta') && $soma > 0): ?><small>R$ <?= number_format($soma, 0, ',', '.') ?>/mês</small><?php endif; ?>
+          <?php if ($etapa === 'ganho' || $etapa === 'perdido'): ?><small>últimos 30 dias</small><?php endif; ?>
+        </header>
+        <div class="coluna-cards" data-soltar>
+          <?php foreach ($cards as $l): ?>
+            <?php
+            $parado = crm_parado($l);
+            $acaoAtrasada = $l['proxima_acao_em'] && $l['proxima_acao_em'] < $agora;
+            ?>
+            <a class="card<?= $l['visto_em'] === null ? ' card-novo' : '' ?>" href="lead.php?id=<?= (int) $l['id'] ?>" draggable="true" data-id="<?= (int) $l['id'] ?>">
+              <span class="card-selos">
+                <?php if ($l['visto_em'] === null): ?><span class="ponto" title="Ainda não visto"></span><?php endif; ?>
+                <?= crm_selo_classe($l['classe']) ?>
+                <?php if ($l['qualificacao'] !== 'lead'): ?><?= crm_selo_qualificacao($l['qualificacao']) ?><?php endif; ?>
+              </span>
+              <b class="card-nome"><?= h($l['nome']) ?></b>
+              <small class="card-empresa"><?= h($l['empresa']) ?></small>
+              <span class="card-info"><?= h($l['segmento']) ?> · <?= h(CRM_INVESTIMENTO[$l['investimento']] ?? '') ?></span>
+              <?php if ($etapa === 'novo'): ?>
+                <span class="card-tempo">Chegou <?= h(crm_tempo_relativo($l['criado_em'])) ?></span>
+              <?php elseif ($etapa === 'ganho'): ?>
+                <span class="card-valor">R$ <?= number_format((float) $l['valor_mensal'], 2, ',', '.') ?>/mês</span>
+              <?php elseif ($etapa === 'perdido'): ?>
+                <span class="card-tempo"><?= h(CRM_MOTIVOS_PERDA[$l['motivo_perda']] ?? '') ?></span>
+              <?php endif; ?>
+              <?php if ($l['proxima_acao'] !== '' && in_array($etapa, CRM_ETAPAS_ABERTAS, true)): ?>
+                <span class="card-acao<?= $acaoAtrasada ? ' atrasada' : '' ?>"><?= $l['proxima_acao_em'] ? h(crm_data($l['proxima_acao_em'])) . ' · ' : '' ?><?= h($l['proxima_acao']) ?></span>
+              <?php elseif (in_array($etapa, ['atendimento', 'agendada', 'realizada', 'proposta'], true)): ?>
+                <span class="card-acao sem">Sem próxima ação</span>
+              <?php endif; ?>
+              <?php if ($parado): ?><span class="card-parado">Parado há <?= $parado ?> dia<?= $parado > 1 ? 's' : '' ?></span><?php endif; ?>
+            </a>
+          <?php endforeach; ?>
+          <?php if (!$cards): ?><p class="coluna-vazia">Nenhum lead</p><?php endif; ?>
         </div>
-      <?php endforeach; ?>
-    </div>
-
-    <?php if ($paginas > 1): ?>
-      <nav class="paginas" aria-label="Páginas">
-        <?php if ($pagina > 1): ?><a href="<?= h(link_filtro(['p' => $pagina - 1])) ?>">← Anterior</a><?php endif; ?>
-        <span>Página <?= $pagina ?> de <?= $paginas ?></span>
-        <?php if ($pagina < $paginas): ?><a href="<?= h(link_filtro(['p' => $pagina + 1])) ?>">Próxima →</a><?php endif; ?>
-      </nav>
-    <?php endif; ?>
-  <?php endif; ?>
+      </section>
+    <?php endforeach; ?>
+  </div>
 </main>
 <?php crm_rodape();

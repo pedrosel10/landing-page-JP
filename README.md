@@ -13,6 +13,31 @@
 | `admin/` | Painel do CRM (login, lista, ficha do lead, exportar CSV, trocar senha) |
 | `inc/` | Núcleo do CRM (banco, sessão, segurança). Bloqueado para acesso direto |
 
+## Como o CRM funciona (inside sales)
+
+**Funil:** Novo contato → Em atendimento → Reunião agendada → Reunião realizada →
+Proposta enviada → Venda realizada (pede o valor mensal) ou Perdido (pede o motivo).
+O funil em kanban (`admin/index.php`) permite arrastar os cards; cada etapa tem um prazo
+e o card ganha o alerta "parado há X dias" quando passa dele. Cada lead tem uma
+**próxima ação com data**; as atrasadas ficam em vermelho.
+
+**Pontuação do formulário (0 a 100) → classe:** investimento (40), desafio (20),
+segmento (15), site ou rede social (10), objetivo explicado (10) e e-mail da empresa (5).
+A (quente) a partir de 70, B (morno) de 45 a 69, C (frio) abaixo de 45. Investimento até
+R$ 1 mil é sempre C; até R$ 2 mil, no máximo B. Regras em `inc/funil.php`.
+
+**Lead → MQL → SQL:** vira MQL automaticamente quando o formulário é classe A ou B.
+Vira SQL no atendimento, quando a lista confirma orçamento e decisor, mais 2 de 3:
+dor clara, quer começar em até 60 dias, operação comercial pronta.
+
+**Integrações (`admin/integracoes.php`):**
+- Meta (API de Conversões): envia Lead, MQL, SQL, Schedule (reunião) e Purchase
+  (venda, com valor), com e-mail e telefone em SHA-256 e o clique do anúncio (fbc).
+  Eventos com erro ficam numa fila e são reenviados.
+- Google Ads: arquivo diário de conversões off-line (`api/google-conversoes.php`,
+  protegido por chave) com GCLID, nome da conversão, data e valor. Sem dados pessoais.
+- A landing page guarda fbclid, gclid e UTMs por 90 dias no navegador do visitante.
+
 ## Onde ficam os leads (e por que o deploy não apaga)
 
 O banco SQLite fica em `~/jp_crm_dados/` no servidor, **um nível acima do `public_html`**

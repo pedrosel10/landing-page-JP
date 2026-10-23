@@ -15,6 +15,7 @@ if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'] ?? '')) {
 }
 
 require __DIR__ . '/config.php';
+date_default_timezone_set('America/Sao_Paulo');
 
 /* O servidor roda PHP 7.4: estas funções só existem a partir do PHP 8.
    Ficam aqui para o código continuar funcionando se alguém usá-las. */
@@ -57,12 +58,13 @@ register_shutdown_function(function () {
 /* ------------------------------------------------------------------ rótulos */
 
 const CRM_STATUS = [
-    'novo'     => 'Novo',
-    'contato'  => 'Em contato',
-    'reuniao'  => 'Reunião agendada',
-    'proposta' => 'Proposta enviada',
-    'ganho'    => 'Fechado',
-    'perdido'  => 'Perdido',
+    'novo'        => 'Novo contato',
+    'atendimento' => 'Em atendimento',
+    'agendada'    => 'Reunião agendada',
+    'realizada'   => 'Reunião realizada',
+    'proposta'    => 'Proposta enviada',
+    'ganho'       => 'Venda realizada',
+    'perdido'     => 'Perdido',
 ];
 
 const CRM_INVESTIMENTO = [
@@ -290,6 +292,70 @@ function crm_migrar(PDO $db): void
         }
         $db->exec('CREATE INDEX IF NOT EXISTS leads_visto ON leads (visto_em)');
         $db->exec('PRAGMA user_version = 2');
+        $versao = 2;
+    }
+
+    /* v3: funil de inside sales, pontuação do formulário, MQL/SQL, próxima ação,
+       cliques de anúncio e fila de integrações. Só acrescenta; nada é apagado. */
+    if ($versao < 3) {
+        $db->exec('BEGIN');
+        $existentes = array_column($db->query('PRAGMA table_info(leads)')->fetchAll(), 'name');
+        $novas = [
+            'pontuacao' => 'INTEGER NOT NULL DEFAULT 0', 'classe' => "TEXT NOT NULL DEFAULT ''",
+            'qualificacao' => "TEXT NOT NULL DEFAULT 'lead'", 'mql_em' => 'TEXT', 'sql_em' => 'TEXT',
+            'qual_orcamento' => 'INTEGER NOT NULL DEFAULT 0', 'qual_decisor' => 'INTEGER NOT NULL DEFAULT 0',
+            'qual_dor' => 'INTEGER NOT NULL DEFAULT 0', 'qual_momento' => 'INTEGER NOT NULL DEFAULT 0',
+            'qual_operacao' => 'INTEGER NOT NULL DEFAULT 0',
+            'etapa_desde' => 'TEXT', 'primeiro_contato_em' => 'TEXT', 'agendada_em' => 'TEXT',
+            'proxima_acao' => "TEXT NOT NULL DEFAULT ''", 'proxima_acao_em' => 'TEXT', 'reuniao_em' => 'TEXT',
+            'valor_mensal' => 'REAL', 'motivo_perda' => "TEXT NOT NULL DEFAULT ''", 'fechado_em' => 'TEXT',
+            'fbc' => "TEXT NOT NULL DEFAULT ''", 'fbp' => "TEXT NOT NULL DEFAULT ''", 'gclid' => "TEXT NOT NULL DEFAULT ''",
+            'gbraid' => "TEXT NOT NULL DEFAULT ''", 'wbraid' => "TEXT NOT NULL DEFAULT ''",
+            'ip' => "TEXT NOT NULL DEFAULT ''", 'user_agent' => "TEXT NOT NULL DEFAULT ''",
+        ];
+        foreach ($novas as $coluna => $tipo) {
+            if (!in_array($coluna, $existentes, true)) {
+                $db->exec("ALTER TABLE leads ADD COLUMN $coluna $tipo");
+            }
+        }
+        /* Etapas antigas → novas */
+        $db->exec("UPDATE leads SET status = 'atendimento' WHERE status = 'contato'");
+        $db->exec("UPDATE leads SET status = 'agendada' WHERE status = 'reuniao'");
+        $db->exec('UPDATE leads SET etapa_desde = atualizado_em WHERE etapa_desde IS NULL');
+        $db->exec("UPDATE leads SET fechado_em = atualizado_em WHERE status IN ('ganho','perdido') AND fechado_em IS NULL");
+        $db->exec("UPDATE leads SET motivo_perda = 'outro' WHERE status = 'perdido' AND motivo_perda = ''");
+
+        $db->exec("CREATE TABLE IF NOT EXISTS envios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL,
+            plataforma TEXT NOT NULL,
+            evento TEXT NOT NULL,
+            event_id TEXT NOT NULL UNIQUE,
+            status TEXT NOT NULL DEFAULT 'pendente',
+            tentativas INTEGER NOT NULL DEFAULT 0,
+            resposta TEXT NOT NULL DEFAULT '',
+            criado_em TEXT NOT NULL,
+            ultima_tentativa TEXT,
+            enviado_em TEXT
+        )");
+        $db->exec('CREATE INDEX IF NOT EXISTS envios_status ON envios (status)');
+        $db->exec("CREATE TABLE IF NOT EXISTS config (chave TEXT PRIMARY KEY, valor TEXT NOT NULL DEFAULT '')");
+        $db->exec('PRAGMA user_version = 3');
+        $db->exec('COMMIT');
+        $versao = 3;
+        $pontuarDepois = true;
+    }
+
+    /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */
+    if (!empty($pontuarDepois) && function_exists('crm_pontuar')) {
+        $sem = $db->query("SELECT * FROM leads WHERE classe = ''")->fetchAll();
+        $up = $db->prepare('UPDATE leads SET pontuacao = ?, classe = ?, qualificacao = ?, mql_em = ? WHERE id = ?');
+        foreach ($sem as $l) {
+            $p = crm_pontuar($l);
+            $l['classe'] = $p['classe'];
+            $q = crm_calcular_qualificacao($l);
+            $up->execute([$p['total'], $p['classe'], $q, $q !== 'lead' ? $l['criado_em'] : null, $l['id']]);
+        }
     }
 }
 
@@ -502,6 +568,7 @@ function crm_exigir_login(): array
         exit;
     }
     crm_backup_diario();
+    crm_processar_envios(3);
     return $usuario;
 }
 
@@ -578,16 +645,17 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=4">
-<script src="assets/admin.js?v=2" defer></script>
+<link rel="stylesheet" href="assets/admin.css?v=6">
+<script src="assets/admin.js?v=3" defer></script>
 </head>
 <body class="<?= h($classe) ?>">
 <?php if ($usuario): ?>
 <header class="bar">
   <a class="bar-brand" href="index.php"><img src="../marca/icone.svg" alt="" width="26" height="26"><img src="../marca/logotipo.svg" alt="J.P.Growth" class="bar-logo" width="118" height="22"><span class="bar-tag">CRM</span></a>
   <nav class="bar-nav">
-    <a href="index.php">Leads<?php if ($naoVistos): ?> <span class="contador" title="Leads ainda não vistos"><?= $naoVistos ?></span><?php endif; ?></a>
-    <a href="exportar.php">Exportar</a>
+    <a href="index.php">Funil<?php if ($naoVistos): ?> <span class="contador" title="Leads ainda não vistos"><?= $naoVistos ?></span><?php endif; ?></a>
+    <a href="lista.php">Lista</a>
+    <a href="integracoes.php">Integrações</a>
     <a href="conta.php">Conta</a>
     <form method="post" action="sair.php"><?= crm_csrf_campo() ?><button type="submit" class="linkbtn">Sair</button></form>
   </nav>
@@ -634,3 +702,6 @@ function crm_link_whatsapp(string $numero, string $mensagem = ''): string
     }
     return 'https://wa.me/' . $digitos . ($mensagem !== '' ? '?text=' . rawurlencode($mensagem) : '');
 }
+
+require __DIR__ . '/funil.php';
+require __DIR__ . '/integracoes.php';

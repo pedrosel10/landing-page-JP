@@ -1607,6 +1607,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
         <!-- anti-spam (honeypot) + rastreamento -->
         <div class="hp" aria-hidden="true"><label>Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="utm_content"><input type="hidden" name="utm_term">
+        <input type="hidden" name="fbc"><input type="hidden" name="fbp"><input type="hidden" name="gclid"><input type="hidden" name="gbraid"><input type="hidden" name="wbraid">
       </form>
 
       <div class="success" role="status" aria-live="polite">
@@ -1755,11 +1756,32 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
     $('#hero-sub').textContent = 'Tráfego + Copy + Criativos + Landing Page + Estratégia + Dados em uma única assessoria.';
   }
 
-  /* UTMs nos campos ocultos */
-  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(k => {
-    const el = document.querySelector(`[name="${k}"]`);
-    if (el && params.get(k)) el.value = params.get(k);
+  /* Origem do visitante: UTMs e clique do anúncio (fbclid da Meta, gclid do Google).
+     Ficam guardados por 90 dias neste navegador: se a pessoa voltar depois e
+     preencher o formulário, o CRM ainda sabe de qual anúncio ela veio. */
+  const ORIGEM_DIAS = 90;
+  const guardar = (chave, valor) => {
+    try { localStorage.setItem('jp_' + chave, JSON.stringify({ v: valor, t: Date.now() })); } catch (e) { /* modo privado */ }
+  };
+  const lembrar = chave => {
+    try {
+      const item = JSON.parse(localStorage.getItem('jp_' + chave) || 'null');
+      if (item && Date.now() - item.t < ORIGEM_DIAS * 864e5) return item.v;
+    } catch (e) { /* ignora */ }
+    return '';
+  };
+  const cookie = nome => (document.cookie.match('(?:^|; )' + nome + '=([^;]*)') || [])[1] || '';
+  if (params.get('fbclid')) guardar('fbc', 'fb.1.' + Date.now() + '.' + params.get('fbclid'));
+  ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(k => {
+    if (params.get(k)) guardar(k, params.get(k));
   });
+  const preencher = (nome, valor) => {
+    const el = document.querySelector(`#lead-form [name="${nome}"]`);
+    if (el && valor) el.value = String(valor).slice(0, 500);
+  };
+  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid'].forEach(k => preencher(k, params.get(k) || lembrar(k)));
+  preencher('fbc', decodeURIComponent(cookie('_fbc')) || lembrar('fbc'));
+  preencher('fbp', decodeURIComponent(cookie('_fbp')));
 
   /* Cliques em CTA */
   $$('[data-cta]').forEach(a => a.addEventListener('click', () => track('cta_click', { cta: a.dataset.cta, variant })));

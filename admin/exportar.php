@@ -8,7 +8,10 @@ $colunas = [
     'id' => 'ID', 'criado_em' => 'Recebido em', 'nome' => 'Nome', 'empresa' => 'Empresa',
     'whatsapp' => 'WhatsApp', 'email' => 'E-mail', 'site_instagram' => 'Site/Instagram',
     'segmento' => 'Segmento', 'investimento' => 'Investimento', 'perfil' => 'Perfil',
-    'desafio' => 'Desafio', 'objetivo' => 'O que quer melhorar', 'status' => 'Status',
+    'desafio' => 'Desafio', 'objetivo' => 'O que quer melhorar', 'status' => 'Etapa',
+    'pontuacao' => 'Pontuação', 'classe' => 'Classe', 'qualificacao' => 'Qualificação',
+    'proxima_acao' => 'Próxima ação', 'proxima_acao_em' => 'Próxima ação em', 'valor_mensal' => 'Valor mensal (R$)',
+    'motivo_perda' => 'Motivo da perda', 'primeiro_contato_em' => 'Primeiro contato em',
     'utm_source' => 'utm_source', 'utm_medium' => 'utm_medium', 'utm_campaign' => 'utm_campaign',
     'utm_content' => 'utm_content', 'utm_term' => 'utm_term',
 ];
@@ -34,6 +37,11 @@ while ($l = $st->fetch()) {
     $l['status'] = CRM_STATUS[$l['status']] ?? $l['status'];
     $l['perfil'] = $l['perfil'] === 'compativel' ? 'No perfil' : 'Abaixo do perfil';
     $l['criado_em'] = crm_data($l['criado_em']);
+    $l['qualificacao'] = CRM_QUALIFICACAO[$l['qualificacao']] ?? $l['qualificacao'];
+    $l['motivo_perda'] = CRM_MOTIVOS_PERDA[$l['motivo_perda']] ?? '';
+    $l['valor_mensal'] = $l['valor_mensal'] !== null ? number_format((float) $l['valor_mensal'], 2, ',', '.') : '';
+    $l['proxima_acao_em'] = $l['proxima_acao_em'] ? crm_data($l['proxima_acao_em']) : '';
+    $l['primeiro_contato_em'] = $l['primeiro_contato_em'] ? crm_data($l['primeiro_contato_em']) : '';
     fputcsv($saida, array_map('celula', array_values($l)), ';', '"', '\\');
 }
 fclose($saida);
