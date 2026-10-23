@@ -59,7 +59,7 @@ $primeiroNome = explode(' ', $lead['nome'])[0];
 $mensagem = "Olá, {$primeiroNome}! Aqui é da J.P.Growth. Recebemos seu contato pelo site e queria entender melhor o momento da {$lead['empresa']}. Podemos conversar?";
 $site = $lead['site_instagram'];
 $linkSite = '';
-if (preg_match('~^@?([A-Za-z0-9._]{1,30})$~', $site, $m) && !str_contains($site, '.')) {
+if (preg_match('~^@?([A-Za-z0-9._]{1,30})$~', $site, $m) && strpos($site, '.') === false) {
     $linkSite = 'https://instagram.com/' . $m[1];
 } elseif (preg_match('~^(https?://)?([a-z0-9-]+\.)+[a-z]{2,}(/\S*)?$~i', $site)) {
     $linkSite = preg_match('~^https?://~i', $site) ? $site : 'https://' . $site;

@@ -16,6 +16,44 @@ if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'] ?? '')) {
 
 require __DIR__ . '/config.php';
 
+/* O servidor roda PHP 7.4: estas funções só existem a partir do PHP 8.
+   Ficam aqui para o código continuar funcionando se alguém usá-las. */
+if (!function_exists('str_contains')) {
+    function str_contains(string $texto, string $trecho): bool { return $trecho === '' || strpos($texto, $trecho) !== false; }
+}
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $texto, string $inicio): bool { return strncmp($texto, $inicio, strlen($inicio)) === 0; }
+}
+if (!function_exists('str_ends_with')) {
+    function str_ends_with(string $texto, string $fim): bool { return $fim === '' || substr($texto, -strlen($fim)) === $fim; }
+}
+
+/* Erro fatal: em vez de página em branco, mostra um aviso (o detalhe vai para o log do servidor) */
+register_shutdown_function(function () {
+    $erro = error_get_last();
+    if (!$erro || !in_array($erro['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+        return;
+    }
+    error_log('[CRM J.P.Growth] Erro fatal: ' . $erro['message'] . ' em ' . basename($erro['file']) . ':' . $erro['line']);
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    if (defined('CRM_MODO_API')) {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+        echo json_encode(['ok' => false, 'erro' => 'servidor']);
+        return;
+    }
+    if (!headers_sent()) {
+        header('Content-Type: text/html; charset=utf-8');
+    }
+    echo '<!doctype html><meta charset="utf-8"><title>Erro no CRM</title>'
+        . '<p style="font-family:sans-serif;padding:24px">Ocorreu um erro no CRM ('
+        . htmlspecialchars(basename($erro['file']) . ':' . $erro['line'], ENT_QUOTES, 'UTF-8')
+        . '). O detalhe foi registrado no log de erros do servidor. <a href="index.php">Voltar ao painel</a></p>';
+});
+
 /* ------------------------------------------------------------------ rótulos */
 
 const CRM_STATUS = [
