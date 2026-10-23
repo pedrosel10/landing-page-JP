@@ -578,8 +578,8 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=3">
-<script src="assets/admin.js?v=1" defer></script>
+<link rel="stylesheet" href="assets/admin.css?v=4">
+<script src="assets/admin.js?v=2" defer></script>
 </head>
 <body class="<?= h($classe) ?>">
 <?php if ($usuario): ?>

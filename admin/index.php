@@ -5,17 +5,6 @@ require __DIR__ . '/../inc/crm.php';
 $usuario = crm_exigir_login();
 $db = crm_db();
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    crm_verificar_post();
-    if (($_POST['acao'] ?? '') === 'marcar_vistos') {
-        $n = $db->prepare('UPDATE leads SET visto_em = ? WHERE visto_em IS NULL');
-        $n->execute([crm_agora()]);
-        crm_aviso($n->rowCount() === 1 ? '1 lead marcado como visto.' : $n->rowCount() . ' leads marcados como vistos.');
-    }
-    header('Location: index.php');
-    exit;
-}
-
 /* Novos ainda não abertos por ninguém */
 $naoVistos = $db->query("SELECT id, criado_em, nome, empresa, whatsapp, segmento, investimento, perfil
     FROM leads WHERE visto_em IS NULL ORDER BY criado_em DESC, id DESC LIMIT 12")->fetchAll();
@@ -58,6 +47,16 @@ $st = $db->prepare("SELECT id, criado_em, nome, empresa, whatsapp, email, segmen
 $st->execute($args);
 $leads = $st->fetchAll();
 
+/* Leads não vistos que estão nesta tela: viram "vistos" quando alguém interage
+   com a página (ver assets/admin.js). Os que você marcou como "não visto" ficam de fora. */
+$idsAuto = [];
+foreach (array_merge($naoVistos, $leads) as $l) {
+    if (!array_key_exists('visto_em', $l) || $l['visto_em'] === null) {
+        $idsAuto[(int) $l['id']] = true;
+    }
+}
+$idsAuto = array_values(array_diff(array_keys($idsAuto), $_SESSION['nao_auto'] ?? []));
+
 /* ---------- indicadores (sempre do total, sem filtro) */
 $inicioMes = (new DateTimeImmutable('first day of this month 00:00', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 $st = $db->prepare("SELECT
@@ -82,7 +81,7 @@ function link_filtro(array $mudar): string
 
 crm_topo('Leads', $usuario);
 ?>
-<main class="wrap">
+<main class="wrap"<?php if ($idsAuto): ?> data-auto-visto data-ids="<?= h(implode(',', $idsAuto)) ?>" data-csrf="<?= h(crm_csrf()) ?>"<?php endif; ?>>
   <div class="cabeca">
     <div>
       <h1>Leads</h1>
@@ -95,7 +94,7 @@ crm_topo('Leads', $usuario);
   <section class="naovistos" aria-label="Novos ainda não vistos">
     <div class="naovistos-cab">
       <h2><span class="ponto"></span>Novos, ainda não vistos <span class="contador"><?= $totalNaoVistos ?></span></h2>
-      <form method="post"><?= crm_csrf_campo() ?><input type="hidden" name="acao" value="marcar_vistos"><button type="submit" class="linkbtn">Marcar todos como vistos</button></form>
+      <span class="naovistos-dica" data-aviso-visto>Viram “vistos” assim que você mexe na página.</span>
     </div>
     <div class="naovistos-grade">
       <?php foreach ($naoVistos as $n): ?>

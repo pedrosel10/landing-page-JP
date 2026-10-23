@@ -40,7 +40,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
     } elseif ($acao === 'nao_visto') {
         $db->prepare('UPDATE leads SET visto_em = NULL WHERE id = ?')->execute([$id]);
-        crm_aviso('Lead marcado como não visto. Ele voltou para o topo da lista.');
+        /* Neste navegador ele não é remarcado sozinho: fica esperando o sócio ver */
+        $_SESSION['nao_auto'] = array_slice(array_values(array_unique(array_merge($_SESSION['nao_auto'] ?? [], [$id]))), -100);
+        crm_aviso('Lead marcado como não visto. Ele fica no topo até seu sócio ver a lista ou alguém abrir a ficha.');
         header('Location: index.php');
         exit;
     } elseif ($acao === 'excluir') {
@@ -57,6 +59,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 /* Abrir a ficha marca o lead como visto (sai da seção "não vistos" da lista) */
+if (!empty($_SESSION['nao_auto'])) {
+    $_SESSION['nao_auto'] = array_values(array_diff($_SESSION['nao_auto'], [$id]));
+}
 if ($lead['visto_em'] === null) {
     $lead['visto_em'] = crm_agora();
     $db->prepare('UPDATE leads SET visto_em = ? WHERE id = ? AND visto_em IS NULL')->execute([$lead['visto_em'], $id]);
