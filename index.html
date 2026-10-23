@@ -503,6 +503,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .depo-title{font-size:1.1rem;line-height:1.3;letter-spacing:-.02em;color:var(--on-dark)}
 .print-btn.depo-btn{position:static;justify-self:start;background:var(--on-dark);color:var(--ink)}
 .print-btn.depo-btn:hover{background:#fff;color:var(--wine)}
+/* No celular ficam só os 3 cases e os 3 depoimentos mais fortes */
+@media (max-width:767px){.mob-hide{display:none}}
 /* Grade de marcas (branding): cards 9:16 que trocam fundo + logo */
 .brands{margin:clamp(64px,8vw,104px) 0 clamp(48px,6vw,72px)}
 .brands-head{display:grid;justify-items:center;gap:18px;margin-bottom:clamp(28px,4vw,40px);text-align:center}
@@ -1189,7 +1191,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <p class="case-ctx">Conta com várias campanhas ativas, acompanhada no dia a dia pela equipe desde dezembro de 2024.</p>
         </div>
       </article>
-      <article class="case reveal">
+      <article class="case reveal mob-hide">
         <!-- Case real: modelo visual com os números do print + botão que abre o print original -->
         <div class="shot shot-real">
           <div class="mock">
@@ -1218,7 +1220,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <p class="case-ctx">Campanha de pesquisa para geração de leads B2B, otimizada continuamente desde julho de 2023.</p>
         </div>
       </article>
-      <article class="case reveal">
+      <article class="case reveal mob-hide">
         <div class="shot shot-real">
           <div class="mock">
             <div class="mock-top"><span class="mock-pf">Meta Ads · Leads</span><span class="badge-real">Dados reais</span></div>
@@ -1234,7 +1236,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <p class="case-ctx">Captação para pós-graduação no Meta Ads. O botão abre também outras campanhas de captação.</p>
         </div>
       </article>
-      <article class="case reveal">
+      <article class="case reveal mob-hide">
         <div class="shot shot-real">
           <div class="mock">
             <div class="mock-top"><span class="mock-pf">Meta Ads · Conjuntos</span><span class="badge-real">Dados reais</span></div>
@@ -1280,12 +1282,12 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg out">Fomos de R$ 113,00 no mês passado para R$ 51,00 por lead neste mês. Eles continuam qualificados?<time>11:01</time></p><p class="msg in">Então, estranhamente mudou pra melhor<time>11:02</time></p><p class="msg in">Respondi na mesma hora que entrou e já agendamos pra unidade de 2 milhões<time>11:02</time></p></div>
           <div class="depo-foot"><p class="depo-title">Custo por lead de R$ 113 para R$ 51, com leads ainda melhores.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-custo-por-lead.jpg" data-caption="Conversa real no grupo do cliente (nome e foto ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
         </article>
-        <article class="depo reveal">
+        <article class="depo reveal mob-hide">
           <div class="depo-top"><span class="depo-seg">Transportes</span><span class="depo-app">WhatsApp</span></div>
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg out">Só nesse mês o Google apontou mais de 30 conversões. Como estão as vendas?<time>11:14</time></p><p class="msg in">Estão muito boa<time>11:15</time></p><p class="msg in">Melhor que no mês passado<time>11:15</time></p></div>
           <div class="depo-foot"><p class="depo-title">Mais de 30 conversões no Google e vendas acima do mês anterior.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-vendas.jpg" data-caption="Conversa real no grupo do cliente (nomes e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
         </article>
-        <article class="depo reveal">
+        <article class="depo reveal mob-hide">
           <div class="depo-top"><span class="depo-seg">Saúde</span><span class="depo-app">WhatsApp</span></div>
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">O trabalho de programação e design que o Pedro presta para nós é impecável em todos os aspectos.<time>19:24</time></p><p class="msg in">Temos uma parceria de anos que não decepciona. Recomendo-o a todos que me pedem indicação de designer.<time>19:24</time></p></div>
           <div class="depo-foot"><p class="depo-title">Uma parceria de anos, com sites de excelência.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-zanata.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
@@ -1295,7 +1297,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">Ele já desenvolveu sites e projetos de Identidade Visual para vários de nossos clientes.<time>19:27</time></p><p class="msg in">Em todos tivemos 100% de satisfação, algo que não alcançávamos com outros designers.<time>19:27</time></p></div>
           <div class="depo-foot"><p class="depo-title">100% de satisfação em sites e identidade visual para os clientes da agência.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-zanata.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
         </article>
-        <article class="depo reveal">
+        <article class="depo reveal mob-hide">
           <div class="depo-top"><span class="depo-seg">Agência de marketing</span><span class="depo-app">WhatsApp</span></div>
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">Os sites que ele desenvolveu para nós e para nossos clientes receberam muitos elogios, e a qualidade do seu trabalho é indiscutível.<time>15:00</time></p><p class="msg in">Além da criação de identidade visual, imagens e sites, ele sempre tem muito bom gosto, além de ser detalhista!<time>15:00</time><span class="react">❤️</span></p></div>
           <div class="depo-foot"><p class="depo-title">Sites elogiados pelos clientes, com bom gosto e atenção aos detalhes.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-agencia.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
