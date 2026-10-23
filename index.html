@@ -1730,11 +1730,9 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 <script>
 /* ==========================================================================
    CONFIGURAÇÃO
-   FORM_ENDPOINT: URL que recebe o lead via POST (JSON). Ex.: webhook do
-   n8n/Make/Zapier, RD Station, HubSpot, Google Apps Script.
-   Vazio = modo de teste (o lead só aparece no console do navegador).
+   FORM_ENDPOINT: recebe o lead via POST (JSON) e grava no CRM (/jp/admin).
    ========================================================================== */
-const FORM_ENDPOINT = '';
+const FORM_ENDPOINT = 'api/lead.php';
 const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
 
 (function () {
@@ -1964,7 +1962,12 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
     try {
       if (FORM_ENDPOINT) {
         const res = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const resposta = await res.json().catch(() => ({}));
+        if (!res.ok || !resposta.ok) {
+          const erro = new Error('HTTP ' + res.status);
+          erro.limite = res.status === 429;
+          throw erro;
+        }
       } else {
         console.info('[LP] Modo de teste: configure FORM_ENDPOINT. Lead:', data);
       }
@@ -1976,6 +1979,9 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
       $('.fprog').hidden = true;
       $('.success').classList.add('show');
     } catch (ex) {
+      err.textContent = ex.limite
+        ? 'Recebemos vários envios seguidos deste aparelho. Aguarde alguns minutos e tente de novo.'
+        : 'Não foi possível enviar agora. Tente novamente em instantes.';
       err.classList.add('show');
       btn.disabled = false;
       btn.firstChild.textContent = 'Quero falar com um especialista ';

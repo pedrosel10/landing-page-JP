@@ -1,2 +1,6 @@
 .DS_Store
 .claude/
+jp_crm_dados/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

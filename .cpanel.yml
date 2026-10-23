@@ -1,8 +1,12 @@
 ---
 # Deploy pelo cPanel (Git™ Version Control → Gerenciar → Pull or Deploy → Deploy HEAD Commit)
-# Copia a landing page para a pasta pública /jp  →  https://SEU-DOMINIO/jp
+# Copia a landing page e o CRM para a pasta pública /jp  →  https://SEU-DOMINIO/jp
 # Se o domínio não usar public_html (ex.: domínio adicional), troque o caminho abaixo
 # pelo document root dele, por exemplo: /home/USUARIO/meudominio.com.br/jp/
+#
+# BANCO DE DADOS DO CRM: fica em ~/jp_crm_dados (fora do public_html) e NÃO faz
+# parte deste repositório. O deploy só copia código para public_html/jp e nunca
+# apaga nada, então os leads continuam intactos a cada atualização.
 deployment:
   tasks:
     - export DEPLOYPATH=$HOME/public_html/jp/
@@ -16,3 +20,7 @@ deployment:
     - /bin/cp marca/*.svg ${DEPLOYPATH}marca/
     - /bin/cp -R marcas $DEPLOYPATH
     - /bin/cp -R prints $DEPLOYPATH
+    # CRM: código apenas (inc/ inclui o .htaccess que bloqueia acesso direto)
+    - /bin/cp -R inc $DEPLOYPATH
+    - /bin/cp -R api $DEPLOYPATH
+    - /bin/cp -R admin $DEPLOYPATH
