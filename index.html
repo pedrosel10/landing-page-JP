@@ -486,6 +486,27 @@ button,input,select,textarea{font:inherit;color:inherit}
 .case blockquote{padding-top:14px;border-top:1px solid var(--line-dark);font-size:14.5px;line-height:1.5;color:var(--on-dark)}
 .case-ctx{padding-top:14px;border-top:1px solid var(--line-dark);font-size:14px;line-height:1.5;color:var(--on-dark-mute)}
 .case cite{display:block;margin-top:8px;font-style:normal;font-size:12.5px;color:var(--on-dark-mute)}
+/* Depoimentos (conversas de WhatsApp) */
+.depos{margin-top:clamp(64px,8vw,104px)}
+.depos-note{max-width:520px;font-size:14px;color:var(--on-dark-mute)}
+.depo-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:900px){.depo-grid{grid-template-columns:repeat(3,1fr)}}
+.depo{display:flex;flex-direction:column;border-radius:16px;background:var(--brown-2);border:1px solid var(--line-dark);overflow:hidden}
+.depo-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0;font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.depo-seg{color:var(--wine-lt)}
+.depo-app{display:inline-flex;align-items:center;gap:6px;color:var(--on-dark-mute)}
+.depo-app::before{content:"";width:6px;height:6px;border-radius:50%;background:#A9CDB2}
+.chat{flex:1;display:flex;flex-direction:column;gap:6px;margin:14px 8px 0;padding:14px 12px;border-radius:10px;background:var(--cream)}
+.msg{position:relative;max-width:88%;padding:8px 10px 18px;border-radius:10px;font-size:13.5px;line-height:1.4;color:var(--ink);box-shadow:0 1px 1px rgba(30,20,18,.08)}
+.msg time{position:absolute;right:8px;bottom:4px;font:500 9px/1 var(--mono);color:var(--mute)}
+.react{position:absolute;left:8px;bottom:-12px;padding:2px 6px;border-radius:999px;background:var(--paper);box-shadow:0 1px 2px rgba(30,20,18,.15);font-size:11px;line-height:1.3}
+.msg:has(.react){margin-bottom:10px}
+.msg.in{align-self:flex-start;background:var(--paper);border-top-left-radius:3px}
+.msg.out{align-self:flex-end;background:#EAD6D3;border-top-right-radius:3px}
+.depo-foot{display:grid;gap:14px;padding:18px}
+.depo-title{font-size:1.1rem;line-height:1.3;letter-spacing:-.02em;color:var(--on-dark)}
+.print-btn.depo-btn{position:static;justify-self:start;background:var(--on-dark);color:var(--ink)}
+.print-btn.depo-btn:hover{background:#fff;color:var(--wine)}
 /* Grade de marcas (branding): cards 9:16 que trocam fundo + logo */
 .brands{margin:clamp(64px,8vw,104px) 0 clamp(48px,6vw,72px)}
 .brands-head{display:grid;justify-items:center;gap:18px;margin-bottom:clamp(28px,4vw,40px);text-align:center}
@@ -1194,6 +1215,33 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <p class="case-ctx">Campanhas de mensagens e de alcance regional rodando em paralelo, com criativos de imagem e vídeo.</p>
         </div>
       </article>
+    </div>
+
+    <!-- Depoimentos: conversas reais de WhatsApp. O card mostra um modelo da conversa;
+         o botão abre o print original com nomes, fotos e telefones borrados. -->
+    <div class="depos">
+      <div class="brands-head reveal">
+        <span class="tag">Depoimentos</span>
+        <h3 class="h3">O que os clientes falam <span class="mute">no dia a dia.</span></h3>
+        <p class="depos-note">Conversas reais de WhatsApp. Nomes, fotos e telefones ocultos para preservar os clientes.</p>
+      </div>
+      <div class="depo-grid">
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Educação</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">Bom dia pessoal<time>11:55</time></p><p class="msg in">Tudo bem ?<time>11:55</time></p><p class="msg in">Sábado fechamos 2 matrículas da internet 🚀🧡🥰<time>11:55</time><span class="react">🎉🚀 3</span></p></div>
+          <div class="depo-foot"><p class="depo-title">2 matrículas fechadas em um sábado, vindas da internet.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-matriculas.jpg" data-caption="Conversa real no grupo do cliente (nome e foto ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Imobiliário</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg out">Fomos de R$ 113,00 no mês passado para R$ 51,00 por lead neste mês. Eles continuam qualificados?<time>11:01</time></p><p class="msg in">Então, estranhamente mudou pra melhor<time>11:02</time></p><p class="msg in">Respondi na mesma hora que entrou e já agendamos pra unidade de 2 milhões<time>11:02</time></p></div>
+          <div class="depo-foot"><p class="depo-title">Custo por lead de R$ 113 para R$ 51, com leads ainda melhores.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-custo-por-lead.jpg" data-caption="Conversa real no grupo do cliente (nome e foto ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Transportes</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg out">Só nesse mês o Google apontou mais de 30 conversões. Como estão as vendas?<time>11:14</time></p><p class="msg in">Estão muito boa<time>11:15</time></p><p class="msg in">Melhor que no mês passado<time>11:15</time></p></div>
+          <div class="depo-foot"><p class="depo-title">Mais de 30 conversões no Google e vendas acima do mês anterior.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-vendas.jpg" data-caption="Conversa real no grupo do cliente (nomes e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+      </div>
     </div>
 
     <!-- Marcas (branding): mesma grade animada do branding_lp. Arquivos em marcas/<marca>/fundo-N.webp + logo-N.svg.
