@@ -432,9 +432,41 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (min-width:900px){.cases{grid-template-columns:repeat(3,1fr)}}
 .case{display:flex;flex-direction:column;border-radius:16px;background:var(--brown-2);border:1px solid var(--line-dark);overflow:hidden}
 .shot{position:relative;display:grid;place-items:center;aspect-ratio:16/10;margin:8px 8px 0;border-radius:10px;text-align:center;color:var(--ink-2);background:repeating-linear-gradient(135deg,var(--cream) 0 10px,var(--cream-2) 10px 20px)}
-.shot span{padding:10px 14px;border-radius:8px;background:var(--paper);font-size:13px;font-weight:500;line-height:1.35;box-shadow:0 0 0 1px var(--line-2)}
+.shot > span:not([class]){padding:10px 14px;border-radius:8px;background:var(--paper);font-size:13px;font-weight:500;line-height:1.35;box-shadow:0 0 0 1px var(--line-2)}
 .shot small{display:block;font:500 9.5px/1.4 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
 .shot .badge-ex{position:absolute;top:10px;left:10px;padding:4px 7px;border-radius:4px;background:var(--wine);color:#fff;font:500 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+/* Case com dados reais: modelo visual + botão para abrir o print */
+.shot-real{place-items:stretch;padding:10px;background:var(--cream);text-align:left;color:var(--ink)}
+.badge-real{display:inline-flex;align-items:center;gap:6px;padding:4px 7px;border-radius:4px;background:var(--up-bg);color:var(--up);font:500 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.badge-real::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.mock{display:flex;flex-direction:column;gap:6px;min-height:0;padding:9px;border-radius:8px;background:var(--paper);box-shadow:0 10px 22px -14px rgba(42,21,18,.4),0 0 0 1px var(--line-2)}
+.mock-top{display:flex;justify-content:space-between;align-items:center;gap:6px;font:500 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.mock-pf{color:var(--ink)}
+.mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.mock-kpis div{padding:5px 6px;border-radius:5px;background:var(--cream-2)}
+.mock-kpis span{display:block;font:500 8px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.mock-kpis b{font-size:clamp(12px,1.2vw,14px);font-weight:500;letter-spacing:-.02em;white-space:nowrap}
+.mock-chart{position:relative;flex:1;min-height:40px}
+.mock-chart svg{top:12px!important}
+.mock-chart svg{position:absolute;inset:0;width:100%;height:100%}
+.mock-cap{position:absolute;top:0;left:0;z-index:1;font:500 8px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.print-btn{position:absolute;right:18px;bottom:18px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:0;border-radius:6px;background:var(--brown);color:var(--on-dark);font:500 11px/1 var(--font);cursor:pointer;box-shadow:0 8px 18px -8px rgba(0,0,0,.6);transition:background-color .2s,transform .2s}
+.print-btn svg{width:12px;height:12px}
+.print-btn:hover{background:var(--wine);transform:translateY(-1px)}
+.print-btn:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+.case-m:has(> div:nth-child(3)) b{font-size:14px}
+/* Visualizador do print */
+.lightbox{width:min(1240px,calc(100vw - 32px));max-width:none;max-height:calc(100vh - 32px);padding:0;border:0;background:transparent;color:var(--on-dark);overflow:visible}
+.lightbox::backdrop{background:rgba(20,10,8,.86);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.lightbox figure{display:grid;gap:12px}
+.lb-scroll{overflow:auto;max-height:calc(100vh - 120px);border-radius:10px;background:#fff;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+.lb-scroll img{display:block;width:100%;height:auto}
+.lightbox figcaption{font-size:13px;color:var(--on-dark-mute)}
+.lb-hint{display:none;font:500 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--on-dark-mute)}
+.lb-close{position:absolute;top:-44px;right:0;display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(241,236,228,.25);border-radius:50%;background:rgba(241,236,228,.08);color:var(--on-dark);font-size:20px;line-height:1;cursor:pointer}
+.lb-close:hover{background:rgba(241,236,228,.18)}
+.lightbox{margin-top:max(60px,calc((100vh - 500px)/2))}
+@media (max-width:700px){.lb-scroll img{width:1100px;max-width:none}.lb-hint{display:block}}
 .case-body{display:grid;gap:14px;padding:20px 18px 22px}
 .case-seg{font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--wine-lt)}
 .case h3{font-size:1.25rem;font-weight:400;line-height:1.2;letter-spacing:-.025em}
@@ -1071,11 +1103,31 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
     <!-- TROCAR: os 3 cases abaixo são EXEMPLOS de estrutura. Substituir por prints, números e depoimentos reais -->
     <div class="cases">
       <article class="case reveal">
-        <div class="shot"><span class="badge-ex">Exemplo</span><span>Print real do dashboard<small>Gerenciador de anúncios · 90 dias</small></span></div>
+        <!-- Case real: modelo visual com os números do print + botão que abre o print original -->
+        <div class="shot shot-real">
+          <div class="mock">
+            <div class="mock-top"><span class="mock-pf">Google Ads · Pesquisa</span><span class="badge-real">Dados reais</span></div>
+            <div class="mock-kpis">
+              <div><span>Conversões</span><b>2.750</b></div>
+              <div><span>Custo/conv.</span><b>R$ 31,69</b></div>
+              <div><span>CTR</span><b>5,46%</b></div>
+            </div>
+            <div class="mock-chart">
+              <span class="mock-cap">CPC médio R$ 2,00 · jul/23 → out/26</span>
+              <svg viewBox="0 0 300 80" preserveAspectRatio="none"><defs><linearGradient id="gcase1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A2E33" stop-opacity=".22"/><stop offset="1" stop-color="#7A2E33" stop-opacity="0"/></linearGradient></defs><path d="M0.0,44.8 L10.0,44.8 L20.0,41.2 L30.0,43.0 L40.0,45.7 L50.0,42.1 L60.0,39.4 L70.0,38.5 L80.0,32.2 L90.0,31.3 L100.0,34.0 L110.0,43.0 L120.0,38.5 L130.0,32.2 L140.0,32.2 L150.0,30.4 L160.0,29.5 L170.0,30.4 L180.0,33.1 L190.0,20.5 L200.0,29.5 L210.0,21.4 L220.0,25.0 L230.0,26.8 L240.0,23.2 L250.0,33.1 L260.0,18.7 L270.0,32.2 L280.0,37.6 L290.0,40.3 L300.0,33.1 L300,80 L0,80 Z" fill="url(#gcase1)"/><path d="M0.0,44.8 L10.0,44.8 L20.0,41.2 L30.0,43.0 L40.0,45.7 L50.0,42.1 L60.0,39.4 L70.0,38.5 L80.0,32.2 L90.0,31.3 L100.0,34.0 L110.0,43.0 L120.0,38.5 L130.0,32.2 L140.0,32.2 L150.0,30.4 L160.0,29.5 L170.0,30.4 L180.0,33.1 L190.0,20.5 L200.0,29.5 L210.0,21.4 L220.0,25.0 L230.0,26.8 L240.0,23.2 L250.0,33.1 L260.0,18.7 L270.0,32.2 L280.0,37.6 L290.0,40.3 L300.0,33.1" fill="none" stroke="#7A2E33" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <button class="print-btn" type="button" data-print="prints/google-ads-pesquisa.jpg" data-caption="Print real do Google Ads · campanha de pesquisa para geração de leads (jul/2023 a out/2026)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver print real</button>
+        </div>
         <div class="case-body">
-          <span class="case-seg">Clínica · Saúde</span>
-          <h3>Do lead caro e frio à agenda cheia com pacientes qualificados.</h3>
-          <div class="case-m"><div><span>CPL</span><b>R$ 48 → R$ 19</b></div><div><span>Leads/mês</span><b>62 → 214</b></div></div>
+          <span class="case-seg">Indústria · Máquinas e colas</span>
+          <h3>2.750 conversões no Google Ads a R$ 31,69 cada.</h3>
+          <div class="case-m">
+            <div><span>Conversões</span><b>2.750</b></div>
+            <div><span>Custo/conv.</span><b>R$ 31,69</b></div>
+            <div><span>Taxa de conv.</span><b>6,31%</b></div>
+            <div><span>Investimento</span><b>R$ 87,1 mil</b></div>
+          </div>
           <blockquote>“[Depoimento real do cliente sobre a experiência e o resultado.]”<cite>[Nome do cliente] · [Cargo, Empresa]</cite></blockquote>
         </div>
       </article>
@@ -1519,6 +1571,15 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
   </div>
 </footer>
 
+<dialog class="lightbox" id="lightbox" aria-label="Print real">
+  <button class="lb-close" type="button" aria-label="Fechar">×</button>
+  <figure>
+    <div class="lb-scroll"><img alt=""></div>
+    <span class="lb-hint">Arraste para os lados para ver o print inteiro</span>
+    <figcaption></figcaption>
+  </figure>
+</dialog>
+
 <div class="mcta"><a class="btn btn-primary" href="#formulario" data-cta="mobile-sticky">Quero falar com um especialista <span class="arr">→</span></a></div>
 
 <script>
@@ -1660,6 +1721,22 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
       loadAll();
       start();
     }
+  }
+
+  /* Prints reais: botões [data-print] abrem a imagem original em tela cheia */
+  const lightbox = $('#lightbox');
+  if (lightbox && lightbox.showModal) {
+    const lbImg = $('img', lightbox), lbCap = $('figcaption', lightbox);
+    $$('[data-print]').forEach(btn => btn.addEventListener('click', () => {
+      lbImg.src = btn.dataset.print;
+      lbImg.alt = btn.dataset.caption || 'Print real';
+      lbCap.textContent = btn.dataset.caption || '';
+      lightbox.showModal();
+      $('.lb-scroll', lightbox).scrollLeft = 0;
+      track('print_open', { print: btn.dataset.print });
+    }));
+    $('.lb-close', lightbox).addEventListener('click', () => lightbox.close());
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.close(); });
   }
 
   /* Ano no rodapé */
