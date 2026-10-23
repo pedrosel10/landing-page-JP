@@ -489,7 +489,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (min-width:900px){.depo-grid{grid-template-columns:repeat(3,1fr)}}
 .depo{display:flex;flex-direction:column;border-radius:16px;background:var(--brown-2);border:1px solid var(--line-dark);overflow:hidden}
 .depo-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0;font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.depo-seg{color:var(--wine-lt)}
+.depo-seg{color:var(--wine-lt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .depo-app{display:inline-flex;align-items:center;gap:6px;color:var(--on-dark-mute)}
 .depo-app::before{content:"";width:6px;height:6px;border-radius:50%;background:#A9CDB2}
 .chat{flex:1;display:flex;flex-direction:column;gap:6px;margin:14px 8px 0;padding:14px 12px;border-radius:10px;background:var(--cream)}
@@ -1236,6 +1236,21 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <div class="depo-top"><span class="depo-seg">Transportes</span><span class="depo-app">WhatsApp</span></div>
           <div class="chat" aria-label="Conversa com o cliente"><p class="msg out">Só nesse mês o Google apontou mais de 30 conversões. Como estão as vendas?<time>11:14</time></p><p class="msg in">Estão muito boa<time>11:15</time></p><p class="msg in">Melhor que no mês passado<time>11:15</time></p></div>
           <div class="depo-foot"><p class="depo-title">Mais de 30 conversões no Google e vendas acima do mês anterior.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-vendas.jpg" data-caption="Conversa real no grupo do cliente (nomes e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Saúde</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">O trabalho de programação e design que o Pedro presta para nós é impecável em todos os aspectos.<time>19:24</time></p><p class="msg in">Temos uma parceria de anos que não decepciona. Recomendo-o a todos que me pedem indicação de designer.<time>19:24</time></p></div>
+          <div class="depo-foot"><p class="depo-title">Uma parceria de anos, com sites de excelência.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-zanata.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Marketing médico</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">Ele já desenvolveu sites e projetos de Identidade Visual para vários de nossos clientes.<time>19:27</time></p><p class="msg in">Em todos tivemos 100% de satisfação, algo que não alcançávamos com outros designers.<time>19:27</time></p></div>
+          <div class="depo-foot"><p class="depo-title">100% de satisfação em sites e identidade visual para os clientes da agência.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-zanata.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
+        </article>
+        <article class="depo reveal">
+          <div class="depo-top"><span class="depo-seg">Agência de marketing</span><span class="depo-app">WhatsApp</span></div>
+          <div class="chat" aria-label="Conversa com o cliente"><p class="msg in">Os sites que ele desenvolveu para nós e para nossos clientes receberam muitos elogios, e a qualidade do seu trabalho é indiscutível.<time>15:00</time><span class="react">❤️</span></p><p class="msg in">Pedro, veja se ficou bom! o depoimento é verdadeiro 😊<time>15:01</time></p></div>
+          <div class="depo-foot"><p class="depo-title">Sites elogiados pelos clientes, com bom gosto e atenção aos detalhes.</p><button class="print-btn depo-btn" type="button" data-print="prints/depo-agencia.jpg" data-caption="Depoimento real enviado por WhatsApp (contato, telefone e fotos ocultos)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver conversa real</button></div>
         </article>
       </div>
     </div>
