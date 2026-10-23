@@ -437,11 +437,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .shot .badge-ex{position:absolute;top:10px;left:10px;padding:4px 7px;border-radius:4px;background:var(--wine);color:#fff;font:500 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
 /* Case com dados reais: modelo visual + botão para abrir o print */
 .shot-real{place-items:stretch;padding:10px;background:var(--cream);text-align:left;color:var(--ink)}
-.badge-real{display:inline-flex;align-items:center;gap:6px;padding:4px 7px;border-radius:4px;background:var(--up-bg);color:var(--up);font:500 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.badge-real{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:4px 7px;border-radius:4px;background:var(--up-bg);color:var(--up);font:500 9px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .badge-real::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
-.mock{display:flex;flex-direction:column;gap:6px;min-height:0;padding:9px;border-radius:8px;background:var(--paper);box-shadow:0 10px 22px -14px rgba(42,21,18,.4),0 0 0 1px var(--line-2)}
-.mock-top{display:flex;justify-content:space-between;align-items:center;gap:6px;font:500 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
-.mock-pf{color:var(--ink)}
+.mock{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden;padding:9px;border-radius:8px;background:var(--paper);box-shadow:0 10px 22px -14px rgba(42,21,18,.4),0 0 0 1px var(--line-2)}
+.mock-top{display:flex;justify-content:space-between;align-items:center;gap:6px;white-space:nowrap;font:500 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.mock-pf{overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .mock-kpis div{padding:5px 6px;border-radius:5px;background:var(--cream-2)}
 .mock-kpis span{display:block;font:500 8px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
@@ -450,8 +450,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .mock-chart svg{top:12px!important}
 .mock-chart svg{position:absolute;inset:0;width:100%;height:100%}
 .mock-cap{position:absolute;top:0;left:0;z-index:1;font:500 8px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.mock-rows{display:grid;align-content:start;gap:3px;flex:1}
+.mrow{display:grid;grid-template-columns:52px 1fr auto 46px;align-items:center;gap:6px;font:500 8.5px/1.2 var(--mono);color:var(--ink-2)}
+.mrow i{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--wine) var(--w),var(--cream-2) var(--w))}
+.mrow b{font-weight:500;color:var(--ink)}
+.mrow em{font-style:normal;text-align:right;color:var(--up)}
 .print-btn{position:absolute;right:18px;bottom:18px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:0;border-radius:6px;background:var(--brown);color:var(--on-dark);font:500 11px/1 var(--font);cursor:pointer;box-shadow:0 8px 18px -8px rgba(0,0,0,.6);transition:background-color .2s,transform .2s}
-.print-btn svg{width:12px;height:12px}
+.print-btn .ic{width:12px;height:12px}
 .print-btn:hover{background:var(--wine);transform:translateY(-1px)}
 .print-btn:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .case-m:has(> div:nth-child(3)) b{font-size:14px}
@@ -460,13 +465,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 .lightbox::backdrop{background:rgba(20,10,8,.86);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .lightbox figure{display:grid;gap:12px}
 .lb-scroll{overflow:auto;max-height:calc(100vh - 120px);border-radius:10px;background:#fff;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
-.lb-scroll img{display:block;width:100%;height:auto}
+.lb-scroll{display:grid;gap:10px;padding:10px}
+.lb-scroll img{display:block;width:100%;height:auto;border-radius:6px}
+.lb-scroll:has(> img.tall:only-child){background:transparent;box-shadow:none;padding:0}
+.lb-scroll img.tall{width:auto;max-width:100%;max-height:calc(100vh - 160px);margin:0 auto}
 .lightbox figcaption{font-size:13px;color:var(--on-dark-mute)}
 .lb-hint{display:none;font:500 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--on-dark-mute)}
 .lb-close{position:absolute;top:-44px;right:0;display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(241,236,228,.25);border-radius:50%;background:rgba(241,236,228,.08);color:var(--on-dark);font-size:20px;line-height:1;cursor:pointer}
 .lb-close:hover{background:rgba(241,236,228,.18)}
 .lightbox{margin-top:max(60px,calc((100vh - 500px)/2))}
-@media (max-width:700px){.lb-scroll img{width:1100px;max-width:none}.lb-hint{display:block}}
+@media (max-width:700px){.lb-scroll img:not(.tall){width:1100px;max-width:none}.lb-hint{display:block}}
+.lightbox:has(.lb-scroll > img.tall:only-child) .lb-hint{display:none}
 .case-body{display:grid;gap:14px;padding:20px 18px 22px}
 .case-seg{font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--wine-lt)}
 .case h3{font-size:1.25rem;font-weight:400;line-height:1.2;letter-spacing:-.025em}
@@ -1118,7 +1127,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
               <svg viewBox="0 0 300 80" preserveAspectRatio="none"><defs><linearGradient id="gcase1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A2E33" stop-opacity=".22"/><stop offset="1" stop-color="#7A2E33" stop-opacity="0"/></linearGradient></defs><path d="M0.0,44.8 L10.0,44.8 L20.0,41.2 L30.0,43.0 L40.0,45.7 L50.0,42.1 L60.0,39.4 L70.0,38.5 L80.0,32.2 L90.0,31.3 L100.0,34.0 L110.0,43.0 L120.0,38.5 L130.0,32.2 L140.0,32.2 L150.0,30.4 L160.0,29.5 L170.0,30.4 L180.0,33.1 L190.0,20.5 L200.0,29.5 L210.0,21.4 L220.0,25.0 L230.0,26.8 L240.0,23.2 L250.0,33.1 L260.0,18.7 L270.0,32.2 L280.0,37.6 L290.0,40.3 L300.0,33.1 L300,80 L0,80 Z" fill="url(#gcase1)"/><path d="M0.0,44.8 L10.0,44.8 L20.0,41.2 L30.0,43.0 L40.0,45.7 L50.0,42.1 L60.0,39.4 L70.0,38.5 L80.0,32.2 L90.0,31.3 L100.0,34.0 L110.0,43.0 L120.0,38.5 L130.0,32.2 L140.0,32.2 L150.0,30.4 L160.0,29.5 L170.0,30.4 L180.0,33.1 L190.0,20.5 L200.0,29.5 L210.0,21.4 L220.0,25.0 L230.0,26.8 L240.0,23.2 L250.0,33.1 L260.0,18.7 L270.0,32.2 L280.0,37.6 L290.0,40.3 L300.0,33.1" fill="none" stroke="#7A2E33" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
             </div>
           </div>
-          <button class="print-btn" type="button" data-print="prints/google-ads-pesquisa.jpg" data-caption="Print real do Google Ads · campanha de pesquisa para geração de leads (jul/2023 a out/2026)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver print real</button>
+          <button class="print-btn" type="button" data-print="prints/google-ads-pesquisa.jpg|prints/google-ads-pesquisa-trimestral.jpg|prints/google-ads-pesquisa-insights.jpg" data-caption="Prints reais do Google Ads · campanha de pesquisa para geração de leads (jul/2023 a out/2026)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver print real</button>
         </div>
         <div class="case-body">
           <span class="case-seg">Indústria · Máquinas e colas</span>
@@ -1133,19 +1142,56 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
         </div>
       </article>
       <article class="case reveal">
-        <div class="shot"><span class="badge-ex">Exemplo</span><span>Print real do dashboard<small>Pedidos · faturamento</small></span></div>
+        <div class="shot shot-real">
+          <div class="mock">
+            <div class="mock-top"><span class="mock-pf">Google Ads · Campanhas</span><span class="badge-real">Dados reais</span></div>
+            <div class="mock-kpis">
+              <div><span>Conversões</span><b>9.234</b></div>
+              <div><span>Custo/conv.</span><b>R$ 4,71</b></div>
+              <div><span>Impressões</span><b>519,7 mil</b></div>
+            </div>
+            <div class="mock-chart">
+              <span class="mock-cap">Impressões · desde dez/24</span>
+              <svg viewBox="0 0 300 80" preserveAspectRatio="none"><path d="M0.0,71.2 L12.5,64.4 L25.0,25.9 L37.5,59.9 L50.0,16.8 L62.5,55.3 L75.0,10.0 L87.5,50.8 L100.0,14.5 L112.5,57.6 L125.0,30.4 L137.5,62.1 L150.0,41.7 L162.5,59.9 L175.0,55.3 L187.5,57.6 L200.0,51.9 L212.5,59.9 L225.0,56.5 L237.5,54.2 L250.0,58.7 L262.5,53.1 L275.0,57.6 L287.5,55.3 L300.0,50.8 L300,80 L0,80 Z" fill="url(#gcase1)"/><path d="M0.0,71.2 L12.5,64.4 L25.0,25.9 L37.5,59.9 L50.0,16.8 L62.5,55.3 L75.0,10.0 L87.5,50.8 L100.0,14.5 L112.5,57.6 L125.0,30.4 L137.5,62.1 L150.0,41.7 L162.5,59.9 L175.0,55.3 L187.5,57.6 L200.0,51.9 L212.5,59.9 L225.0,56.5 L237.5,54.2 L250.0,58.7 L262.5,53.1 L275.0,57.6 L287.5,55.3 L300.0,50.8" fill="none" stroke="#7A2E33" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <button class="print-btn" type="button" data-print="prints/google-ads-conversoes-foto.jpg" data-caption="Foto real da conta do Google Ads (nomes das campanhas ocultos para preservar o cliente)"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver print real</button>
+        </div>
         <div class="case-body">
-          <span class="case-seg">Restaurante · Delivery</span>
-          <h3>Campanhas, criativos e página trabalhando juntos pelo pedido.</h3>
-          <div class="case-m"><div><span>ROAS</span><b>2,1x → 6,2x</b></div><div><span>Pedidos/mês</span><b>+140%</b></div></div>
+          <span class="case-seg">Google Ads · Geração de demanda</span>
+          <h3>9.234 conversões com custo de R$ 4,71 por conversão.</h3>
+          <div class="case-m">
+            <div><span>Conversões</span><b>9.234</b></div>
+            <div><span>Custo/conv.</span><b>R$ 4,71</b></div>
+            <div><span>Impressões</span><b>519,7 mil</b></div>
+            <div><span>Investimento</span><b>R$ 43,5 mil</b></div>
+          </div>
+          <p class="case-ctx">Conta com várias campanhas ativas, acompanhada no dia a dia pela equipe desde dezembro de 2024.</p>
         </div>
       </article>
       <article class="case reveal">
-        <div class="shot"><span class="badge-ex">Exemplo</span><span>Print real do dashboard<small>Leads · visitas agendadas</small></span></div>
+        <div class="shot shot-real">
+          <div class="mock">
+            <div class="mock-top"><span class="mock-pf">Meta Ads · Conjuntos</span><span class="badge-real">Dados reais</span></div>
+            <div class="mock-kpis">
+              <div><span>Impressões</span><b>1,88 mi</b></div>
+              <div><span>Custo/visita</span><b>R$ 0,35</b></div>
+              <div><span>Investido</span><b>R$ 16 mil</b></div>
+            </div>
+            <div class="mock-rows"><div class="mrow"><span>Visitas</span><i style="--w:100%"></i><b>4.472</b><em>R$ 0,35</em></div><div class="mrow"><span>Conversas</span><i style="--w:64%"></i><b>288</b><em>R$ 11,00</em></div><div class="mrow"><span>Conversas</span><i style="--w:42%"></i><b>186</b><em>R$ 15,34</em></div></div>
+          </div>
+          <button class="print-btn" type="button" data-print="prints/meta-ads-conjuntos.jpg" data-caption="Print real do Gerenciador de Anúncios da Meta · 35 conjuntos de anúncios"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>Ver print real</button>
+        </div>
         <div class="case-body">
-          <span class="case-seg">Imobiliária</span>
-          <h3>Menos curiosos, mais visitas agendadas com quem pode comprar.</h3>
-          <div class="case-m"><div><span>Custo/visita</span><b>−42%</b></div><div><span>Leads qualif.</span><b>3,1x</b></div></div>
+          <span class="case-seg">Meta Ads · Instagram e WhatsApp</span>
+          <h3>1,88 milhão de impressões e conversas a partir de R$ 11.</h3>
+          <div class="case-m">
+            <div><span>Impressões</span><b>1,88 mi</b></div>
+            <div><span>Custo/conversa</span><b>R$ 11,00</b></div>
+            <div><span>Visitas ao perfil</span><b>4.472</b></div>
+            <div><span>Investimento</span><b>R$ 16 mil</b></div>
+          </div>
+          <p class="case-ctx">Campanhas de mensagens e de alcance regional rodando em paralelo, com criativos de imagem e vídeo.</p>
         </div>
       </article>
     </div>
@@ -1573,7 +1619,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 <dialog class="lightbox" id="lightbox" aria-label="Print real">
   <button class="lb-close" type="button" aria-label="Fechar">×</button>
   <figure>
-    <div class="lb-scroll"><img alt=""></div>
+    <div class="lb-scroll"></div>
     <span class="lb-hint">Arraste para os lados para ver o print inteiro</span>
     <figcaption></figcaption>
   </figure>
@@ -1722,16 +1768,26 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
     }
   }
 
-  /* Prints reais: botões [data-print] abrem a imagem original em tela cheia */
+  /* Prints reais: botões [data-print] abrem as imagens originais em tela cheia.
+     Vários prints no mesmo botão: separar os caminhos por | */
   const lightbox = $('#lightbox');
   if (lightbox && lightbox.showModal) {
-    const lbImg = $('img', lightbox), lbCap = $('figcaption', lightbox);
+    const lbScroll = $('.lb-scroll', lightbox), lbCap = $('figcaption', lightbox);
     $$('[data-print]').forEach(btn => btn.addEventListener('click', () => {
-      lbImg.src = btn.dataset.print;
-      lbImg.alt = btn.dataset.caption || 'Print real';
-      lbCap.textContent = btn.dataset.caption || '';
+      const caption = btn.dataset.caption || 'Print real';
+      lbScroll.innerHTML = '';
+      btn.dataset.print.split('|').forEach((src, i) => {
+        const img = new Image();
+        img.alt = i ? '' : caption;
+        img.decoding = 'async';
+        img.onload = () => img.classList.toggle('tall', img.naturalHeight > img.naturalWidth);
+        img.src = src.trim();
+        lbScroll.appendChild(img);
+      });
+      lbCap.textContent = caption;
       lightbox.showModal();
-      $('.lb-scroll', lightbox).scrollLeft = 0;
+      lbScroll.scrollLeft = 0;
+      lbScroll.scrollTop = 0;
       track('print_open', { print: btn.dataset.print });
     }));
     $('.lb-close', lightbox).addEventListener('click', () => lightbox.close());
