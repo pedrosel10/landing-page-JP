@@ -5,6 +5,22 @@ require __DIR__ . '/../inc/crm.php';
 $usuario = crm_exigir_login();
 $db = crm_db();
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    crm_verificar_post();
+    if (($_POST['acao'] ?? '') === 'marcar_vistos') {
+        $n = $db->prepare('UPDATE leads SET visto_em = ? WHERE visto_em IS NULL');
+        $n->execute([crm_agora()]);
+        crm_aviso($n->rowCount() === 1 ? '1 lead marcado como visto.' : $n->rowCount() . ' leads marcados como vistos.');
+    }
+    header('Location: index.php');
+    exit;
+}
+
+/* Novos ainda não abertos por ninguém */
+$naoVistos = $db->query("SELECT id, criado_em, nome, empresa, whatsapp, segmento, investimento, perfil
+    FROM leads WHERE visto_em IS NULL ORDER BY criado_em DESC, id DESC LIMIT 12")->fetchAll();
+$totalNaoVistos = crm_total_nao_vistos();
+
 /* ---------- filtros (GET) */
 $busca  = crm_texto($_GET['q'] ?? '', 80);
 $status = (string) ($_GET['status'] ?? '');
@@ -37,7 +53,7 @@ $total = (int) $st->fetchColumn();
 $paginas = max(1, (int) ceil($total / $porPagina));
 $pagina = min($pagina, $paginas);
 
-$st = $db->prepare("SELECT id, criado_em, nome, empresa, whatsapp, email, segmento, investimento, perfil, status
+$st = $db->prepare("SELECT id, criado_em, nome, empresa, whatsapp, email, segmento, investimento, perfil, status, visto_em
     FROM leads $sqlWhere ORDER BY criado_em DESC, id DESC LIMIT $porPagina OFFSET " . (($pagina - 1) * $porPagina));
 $st->execute($args);
 $leads = $st->fetchAll();
@@ -74,6 +90,27 @@ crm_topo('Leads', $usuario);
     </div>
     <a class="btn btn-claro" href="exportar.php">Exportar CSV</a>
   </div>
+
+  <?php if ($naoVistos): ?>
+  <section class="naovistos" aria-label="Novos ainda não vistos">
+    <div class="naovistos-cab">
+      <h2><span class="ponto"></span>Novos, ainda não vistos <span class="contador"><?= $totalNaoVistos ?></span></h2>
+      <form method="post"><?= crm_csrf_campo() ?><input type="hidden" name="acao" value="marcar_vistos"><button type="submit" class="linkbtn">Marcar todos como vistos</button></form>
+    </div>
+    <div class="naovistos-grade">
+      <?php foreach ($naoVistos as $n): ?>
+        <a class="nv" href="lead.php?id=<?= (int) $n['id'] ?>">
+          <span class="nv-quando"><?= h(crm_tempo_relativo($n['criado_em'])) ?></span>
+          <b><?= h($n['nome']) ?></b>
+          <small><?= h($n['empresa']) ?></small>
+          <span class="nv-info"><?= h($n['segmento']) ?> · <?= h(CRM_INVESTIMENTO[$n['investimento']] ?? $n['investimento']) ?></span>
+          <span class="nv-rodape"><?= crm_selo_perfil($n['perfil']) ?><span class="nv-abrir">Abrir →</span></span>
+        </a>
+      <?php endforeach; ?>
+    </div>
+    <?php if ($totalNaoVistos > count($naoVistos)): ?><p class="muted">Mostrando os <?= count($naoVistos) ?> mais recentes de <?= $totalNaoVistos ?> não vistos.</p><?php endif; ?>
+  </section>
+  <?php endif; ?>
 
   <section class="kpis" aria-label="Indicadores">
     <a class="kpi" href="index.php"><span>Total</span><b><?= (int) $k['total'] ?></b><small><?= (int) $k['mes'] ?> este mês</small></a>
@@ -116,9 +153,9 @@ crm_topo('Leads', $usuario);
         <span role="columnheader">Investimento</span><span role="columnheader">Perfil</span><span role="columnheader">Status</span><span role="columnheader"></span>
       </div>
       <?php foreach ($leads as $l): ?>
-        <div class="linha" role="row">
+        <div class="linha<?= $l['visto_em'] === null ? ' linha-nova' : '' ?>" role="row">
           <span class="c-data" role="cell"><?= h(crm_data($l['criado_em'])) ?></span>
-          <span class="c-lead" role="cell"><a href="lead.php?id=<?= (int) $l['id'] ?>"><b><?= h($l['nome']) ?></b><small><?= h($l['empresa']) ?></small></a></span>
+          <span class="c-lead" role="cell"><a href="lead.php?id=<?= (int) $l['id'] ?>"><b><?php if ($l['visto_em'] === null): ?><span class="ponto" title="Ainda não visto"></span><?php endif; ?><?= h($l['nome']) ?></b><small><?= h($l['empresa']) ?></small></a></span>
           <span class="c-seg" role="cell"><?= h($l['segmento']) ?></span>
           <span class="c-inv" role="cell"><?= h(CRM_INVESTIMENTO[$l['investimento']] ?? $l['investimento']) ?></span>
           <span role="cell"><?= crm_selo_perfil($l['perfil']) ?></span>

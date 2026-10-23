@@ -38,6 +38,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $db->prepare('UPDATE leads SET atualizado_em = ? WHERE id = ?')->execute([crm_agora(), $id]);
             crm_aviso('Anotação salva.');
         }
+    } elseif ($acao === 'nao_visto') {
+        $db->prepare('UPDATE leads SET visto_em = NULL WHERE id = ?')->execute([$id]);
+        crm_aviso('Lead marcado como não visto. Ele voltou para o topo da lista.');
+        header('Location: index.php');
+        exit;
     } elseif ($acao === 'excluir') {
         if (($_POST['confirmar'] ?? '') === 'EXCLUIR') {
             $db->prepare('DELETE FROM leads WHERE id = ?')->execute([$id]);
@@ -49,6 +54,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
     header('Location: lead.php?id=' . $id);
     exit;
+}
+
+/* Abrir a ficha marca o lead como visto (sai da seção "não vistos" da lista) */
+if ($lead['visto_em'] === null) {
+    $lead['visto_em'] = crm_agora();
+    $db->prepare('UPDATE leads SET visto_em = ? WHERE id = ? AND visto_em IS NULL')->execute([$lead['visto_em'], $id]);
 }
 
 $st = $db->prepare('SELECT * FROM notas WHERE lead_id = ? ORDER BY criado_em DESC, id DESC');
@@ -95,6 +106,13 @@ crm_topo($lead['nome'], $usuario);
           <?php endforeach; ?>
         </select>
         <button type="submit" class="btn btn-escuro">Salvar</button>
+      </form>
+      <form method="post" class="visto-form">
+        <?= crm_csrf_campo() ?>
+        <input type="hidden" name="acao" value="nao_visto">
+        <input type="hidden" name="id" value="<?= (int) $id ?>">
+        <span class="muted">Visto em <?= h(crm_data($lead['visto_em'])) ?></span>
+        <button type="submit" class="linkbtn">Marcar como não visto</button>
       </form>
 
       <h2>Dados do formulário</h2>

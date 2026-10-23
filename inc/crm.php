@@ -277,7 +277,50 @@ function crm_migrar(PDO $db): void
         $db->exec('CREATE INDEX IF NOT EXISTS tentativas_busca ON tentativas (tipo, chave, momento)');
 
         $db->exec('PRAGMA user_version = 1');
+        $versao = 1;
     }
+
+    /* v2: data em que o lead foi aberto pela primeira vez (NULL = ainda não visto).
+       Leads que já tinham andado no funil entram como vistos. */
+    if ($versao < 2) {
+        $colunas = array_column($db->query('PRAGMA table_info(leads)')->fetchAll(), 'name');
+        if (!in_array('visto_em', $colunas, true)) {
+            $db->exec('ALTER TABLE leads ADD COLUMN visto_em TEXT');
+            $db->exec("UPDATE leads SET visto_em = atualizado_em WHERE status <> 'novo'");
+        }
+        $db->exec('CREATE INDEX IF NOT EXISTS leads_visto ON leads (visto_em)');
+        $db->exec('PRAGMA user_version = 2');
+    }
+}
+
+function crm_total_nao_vistos(): int
+{
+    return (int) crm_db()->query('SELECT COUNT(*) FROM leads WHERE visto_em IS NULL')->fetchColumn();
+}
+
+/* "há 5 min", "há 3 h", "ontem", "há 4 dias" ou a data */
+function crm_tempo_relativo(string $data): string
+{
+    $tz = new DateTimeZone('America/Sao_Paulo');
+    $d = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data, $tz);
+    if (!$d) {
+        return $data;
+    }
+    $seg = time() - $d->getTimestamp();
+    if ($seg < 60) {
+        return 'agora';
+    }
+    if ($seg < 3600) {
+        return 'há ' . floor($seg / 60) . ' min';
+    }
+    if ($seg < 86400) {
+        return 'há ' . floor($seg / 3600) . ' h';
+    }
+    $dias = (int) floor($seg / 86400);
+    if ($dias === 1) {
+        return 'ontem';
+    }
+    return $dias < 7 ? "há {$dias} dias" : $d->format('d/m/Y');
 }
 
 function crm_agora(): string
@@ -523,18 +566,19 @@ function crm_atraso_login(): void
 function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): void
 {
     $aviso = crm_pegar_aviso();
+    $naoVistos = $usuario ? crm_total_nao_vistos() : 0;
     ?><!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title><?= h($titulo) ?> | CRM J.P.Growth</title>
+<title><?= $naoVistos ? '(' . $naoVistos . ') ' : '' ?><?= h($titulo) ?> | CRM J.P.Growth</title>
 <link rel="icon" type="image/svg+xml" href="../marca/icone.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=2">
+<link rel="stylesheet" href="assets/admin.css?v=3">
 <script src="assets/admin.js?v=1" defer></script>
 </head>
 <body class="<?= h($classe) ?>">
@@ -542,7 +586,7 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <header class="bar">
   <a class="bar-brand" href="index.php"><img src="../marca/icone.svg" alt="" width="26" height="26"><img src="../marca/logotipo.svg" alt="J.P.Growth" class="bar-logo" width="118" height="22"><span class="bar-tag">CRM</span></a>
   <nav class="bar-nav">
-    <a href="index.php">Leads</a>
+    <a href="index.php">Leads<?php if ($naoVistos): ?> <span class="contador" title="Leads ainda não vistos"><?= $naoVistos ?></span><?php endif; ?></a>
     <a href="exportar.php">Exportar</a>
     <a href="conta.php">Conta</a>
     <form method="post" action="sair.php"><?= crm_csrf_campo() ?><button type="submit" class="linkbtn">Sair</button></form>

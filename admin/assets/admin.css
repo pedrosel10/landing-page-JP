@@ -145,3 +145,28 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--wine);bo
 .perigo form{display:grid;gap:10px;margin-top:12px}
 .perigo label{display:grid;gap:6px;font-size:13.5px}
 .perigo .btn{justify-self:start}
+
+/* Não vistos */
+.ponto{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:var(--wine);box-shadow:0 0 0 3px rgba(122,46,51,.15);vertical-align:middle}
+.contador{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--wine);color:#fff;font:600 11px/1 var(--font);letter-spacing:0;vertical-align:middle}
+.naovistos{margin:22px 0 6px;padding:18px;border-radius:14px;background:var(--wine-soft);border:1px solid rgba(122,46,51,.18)}
+.naovistos-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.naovistos-cab h2{margin:0;display:flex;align-items:center;gap:6px;color:var(--wine)}
+.naovistos-cab form{margin:0}
+.naovistos-cab .linkbtn{color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+.naovistos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.nv{display:grid;gap:3px;padding:14px;border-radius:10px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--wine);color:var(--ink);text-decoration:none;transition:transform .15s,box-shadow .15s}
+.nv:hover{transform:translateY(-1px);box-shadow:0 10px 24px -16px rgba(42,21,18,.5)}
+.nv b{font-weight:600}
+.nv small{color:var(--mute);font-size:13px}
+.nv-quando{font:500 10.5px/1.3 var(--mono);color:var(--wine)}
+.nv-info{font-size:13px;color:var(--ink-2)}
+.nv-rodape{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.nv-abrir{font-size:13px;font-weight:500;color:var(--wine)}
+.naovistos .muted{margin-top:10px;font-size:13px}
+.linha-nova{background:#FCF4F2}
+.linha-nova .c-lead b{color:var(--wine)}
+.visto-form{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 0;font-size:13px}
+.visto-form .muted{margin:0}
+.visto-form .linkbtn{padding:6px 0;color:var(--wine);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.bar-nav .contador{margin-left:2px;height:18px;min-width:18px;font-size:10.5px}
