@@ -21,10 +21,10 @@ O funil em kanban (`admin/index.php`) permite arrastar os cards; cada etapa tem 
 e o card ganha o alerta "parado há X dias" quando passa dele. Cada lead tem uma
 **próxima ação com data**; as atrasadas ficam em vermelho.
 
-**Pontuação do formulário (0 a 100) → classe:** investimento (40), desafio (20),
-segmento (15), site ou rede social (10), objetivo explicado (10) e e-mail da empresa (5).
-A (quente) a partir de 70, B (morno) de 45 a 69, C (frio) abaixo de 45. Investimento até
-R$ 1 mil é sempre C; até R$ 2 mil, no máximo B. Regras em `inc/funil.php`.
+**Pontuação do formulário (0 a 100) → classe:** verba mensal de anúncios (45),
+desafio (25), segmento (15), site ou rede social (10) e e-mail da empresa (5).
+A (quente) a partir de 70, B (morno) de 45 a 69, C (frio) abaixo de 45. Quem ainda não
+anuncia fica no máximo em B. Regras em `inc/funil.php`.
 
 **Lead → MQL → SQL:** vira MQL automaticamente quando o formulário é classe A ou B.
 Vira SQL no atendimento, quando a lista confirma orçamento e decisor, mais 2 de 3:

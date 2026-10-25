@@ -238,11 +238,11 @@ crm_topo($lead['nome'], $usuario);
           <div><dt>WhatsApp</dt><dd><?= h($lead['whatsapp']) ?></dd></div>
           <div><dt>E-mail</dt><dd><?= h($lead['email']) ?></dd></div>
           <div><dt>Empresa</dt><dd><?= h($lead['empresa']) ?></dd></div>
-          <div><dt>Site / Instagram</dt><dd><?php if ($linkSite): ?><a href="<?= h($linkSite) ?>" target="_blank" rel="noopener noreferrer nofollow"><?= h($site) ?></a><?php else: ?><?= h($site) ?><?php endif; ?></dd></div>
+          <div><dt>Site / Instagram</dt><dd><?php if ($linkSite): ?><a href="<?= h($linkSite) ?>" target="_blank" rel="noopener noreferrer nofollow"><?= h($site) ?></a><?php elseif ($site !== ''): ?><?= h($site) ?><?php else: ?><span class="muted">Não informado</span><?php endif; ?></dd></div>
           <div><dt>Segmento</dt><dd><?= h($lead['segmento']) ?></dd></div>
-          <div><dt>Investimento mensal</dt><dd><?= h(CRM_INVESTIMENTO[$lead['investimento']] ?? $lead['investimento']) ?></dd></div>
+          <div><dt>Verba de anúncios por mês</dt><dd><?= h(CRM_INVESTIMENTO[$lead['investimento']] ?? $lead['investimento']) ?></dd></div>
           <div class="largo"><dt>Principal desafio</dt><dd><?= h(CRM_DESAFIO[$lead['desafio']] ?? $lead['desafio']) ?></dd></div>
-          <div class="largo"><dt>O que quer melhorar</dt><dd class="texto-livre"><?= $lead['objetivo'] !== '' ? nl2br(h($lead['objetivo'])) : '<span class="muted">Não preenchido</span>' ?></dd></div>
+          <?php if ($lead['objetivo'] !== ''): ?><div class="largo"><dt>O que quer melhorar</dt><dd class="texto-livre"><?= nl2br(h($lead['objetivo'])) ?></dd></div><?php endif; ?>
         </dl>
         <h2>Origem</h2>
         <dl class="dados dados-origem">
@@ -267,7 +267,7 @@ crm_topo($lead['nome'], $usuario);
             <li><span><?= h($item[0]) ?></span><b><?= (int) $item[1] ?>/<?= (int) $item[2] ?></b></li>
           <?php endforeach; ?>
         </ul>
-        <p class="muted regra">A: 70+ · B: 45 a 69 · C: abaixo de 45. Investimento até R$ 1 mil é sempre C; até R$ 2 mil, no máximo B.</p>
+        <p class="muted regra">A: 70+ · B: 45 a 69 · C: abaixo de 45. Quem ainda não anuncia fica no máximo em B.</p>
       </section>
 
       <section class="cartao">

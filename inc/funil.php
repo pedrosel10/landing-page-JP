@@ -41,7 +41,7 @@ const CRM_MOTIVOS_PERDA = [
    SQL (Sales Qualified Lead): confirmado na conversa: orçamento E decisor,
    mais pelo menos 2 dos outros 3 critérios. */
 const CRM_CRITERIOS_SQL = [
-    'qual_orcamento' => ['Orçamento confirmado', 'Pode investir R$ 2 mil+ por mês na assessoria, além da verba de anúncios.', true],
+    'qual_orcamento' => ['Orçamento confirmado', 'Pode pagar R$ 2 mil+ por mês pela assessoria, além da verba de anúncios.', true],
     'qual_decisor'   => ['Fala com quem decide', 'É dono, sócio ou quem aprova a contratação.', true],
     'qual_dor'       => ['Dor clara', 'Tem um problema concreto que a assessoria resolve.', false],
     'qual_momento'   => ['Quer começar logo', 'Pretende começar em até 60 dias.', false],
@@ -55,17 +55,28 @@ const CRM_QUALIFICACAO = [
 ];
 
 /* -------------------------------------------- pontuação do formulário
-   0 a 100 pontos, só com as respostas do formulário (perfil/fit).
+   0 a 100 pontos, só com as respostas do formulário (perfil/fit):
+   verba de anúncios (45) + desafio (25) + segmento (15) + site/rede (10) + e-mail da empresa (5).
    A (quente) >= 70 · B (morno) >= 45 · C (frio) abaixo disso.
-   Corte: investimento até R$ 1 mil é sempre C; até R$ 2 mil, no máximo B. */
-const CRM_PONTOS_INVESTIMENTO = ['ate-1k' => 0, '1-2k' => 12, '2-3k' => 28, '3-5k' => 36, '5k+' => 40];
+   Quem ainda não anuncia fica no máximo em B. (Faixas antigas, de investimento
+   total em marketing: até R$ 1 mil é sempre C; até R$ 2 mil, no máximo B.) */
+const CRM_PONTOS_INVESTIMENTO = [
+    'nao-investe' => 8, 'ate-5k' => 22, '5-10k' => 34, '10-20k' => 40,
+    '20-40k' => 45, '40-80k' => 45, '80-150k' => 45, '150-300k' => 45, '300-500k' => 45, '500k+' => 45,
+    'ate-1k' => 0, '1-2k' => 12, '2-3k' => 25, '3-5k' => 32, '5k+' => 40,
+];
 const CRM_PONTOS_DESAFIO = [
-    'leads-nao-convertem'      => 20, // já gera volume: precisa do sistema completo
-    'trafego-caro'             => 18, // já investe em mídia
-    'anuncios-sem-performance' => 18, // já investe em mídia
-    'poucos-leads'             => 14,
-    'estruturar-marketing'     => 10,
+    'leads-nao-convertem'      => 25, // já gera volume: precisa do sistema completo
+    'cac-alto'                 => 25, // já investe e quer escalar
+    'agencia-sem-resultado'    => 22, // já investe e está insatisfeito
+    'lucro-incerto'            => 20,
+    'resultado-oscila'         => 20,
+    'sem-clareza'              => 18,
+    'poucos-leads'             => 16,
+    'estruturar-marketing'     => 12,
     'outro'                    => 5,
+    'trafego-caro'             => 22, // formulário antigo
+    'anuncios-sem-performance' => 22, // formulário antigo
 ];
 const CRM_SEGMENTOS_PRIORITARIOS = ['Clínica / saúde', 'Odontologia', 'Estética e beleza', 'Imobiliária', 'Empresa de serviços', 'Educação'];
 const CRM_EMAILS_GRATUITOS = ['gmail.com', 'hotmail.com', 'outlook.com', 'live.com', 'yahoo.com', 'yahoo.com.br', 'icloud.com', 'bol.com.br', 'uol.com.br', 'terra.com.br', 'msn.com', 'me.com', 'protonmail.com'];
@@ -82,10 +93,10 @@ function crm_pontuar(array $lead): array
     $itens = [];
 
     $inv = (string) ($lead['investimento'] ?? '');
-    $itens[] = ['Investimento mensal: ' . (CRM_INVESTIMENTO[$inv] ?? 'não informado'), CRM_PONTOS_INVESTIMENTO[$inv] ?? 0, 40];
+    $itens[] = ['Verba: ' . (CRM_INVESTIMENTO[$inv] ?? 'não informada'), CRM_PONTOS_INVESTIMENTO[$inv] ?? 0, 45];
 
     $des = (string) ($lead['desafio'] ?? '');
-    $itens[] = ['Desafio: ' . (CRM_DESAFIO[$des] ?? 'não informado'), CRM_PONTOS_DESAFIO[$des] ?? 0, 20];
+    $itens[] = ['Desafio: ' . (CRM_DESAFIO[$des] ?? 'não informado'), CRM_PONTOS_DESAFIO[$des] ?? 0, 25];
 
     $seg = (string) ($lead['segmento'] ?? '');
     $pSeg = in_array($seg, CRM_SEGMENTOS_PRIORITARIOS, true) ? 15 : ($seg === 'Outro' || $seg === '' ? 4 : 10);
@@ -104,11 +115,6 @@ function crm_pontuar(array $lead): array
     }
     $itens[] = [$rotSite, $pSite, 10];
 
-    $obj = trim((string) ($lead['objetivo'] ?? ''));
-    $tam = function_exists('mb_strlen') ? mb_strlen($obj) : strlen($obj);
-    $pObj = $tam >= 30 ? 10 : ($tam > 0 ? 5 : 0);
-    $itens[] = [$tam >= 30 ? 'Explicou o que quer melhorar' : ($tam > 0 ? 'Resposta curta sobre o objetivo' : 'Não contou o objetivo'), $pObj, 10];
-
     $dominio = strtolower((string) substr(strrchr((string) ($lead['email'] ?? ''), '@') ?: '', 1));
     $pEmail = ($dominio !== '' && !in_array($dominio, CRM_EMAILS_GRATUITOS, true)) ? 5 : 0;
     $itens[] = [$pEmail ? 'E-mail com domínio da empresa' : 'E-mail pessoal (Gmail, Hotmail...)', $pEmail, 5];
@@ -121,7 +127,7 @@ function crm_pontuar(array $lead): array
     $classe = $total >= 70 ? 'A' : ($total >= 45 ? 'B' : 'C');
     if ($inv === 'ate-1k') {
         $classe = 'C';
-    } elseif ($inv === '1-2k' && $classe === 'A') {
+    } elseif (($inv === '1-2k' || $inv === 'nao-investe') && $classe === 'A') {
         $classe = 'B';
     }
 

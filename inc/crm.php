@@ -67,25 +67,45 @@ const CRM_STATUS = [
     'perdido'     => 'Perdido',
 ];
 
+/* Verba mensal de anúncios (só campanhas, sem equipe ou assessoria).
+   As faixas antigas (investimento total em marketing) continuam aqui para
+   exibir os leads que chegaram antes da mudança no formulário. */
 const CRM_INVESTIMENTO = [
-    'ate-1k' => 'Até R$ 1.000',
-    '1-2k'   => 'R$ 1.000 – 2.000',
-    '2-3k'   => 'R$ 2.000 – 3.000',
-    '3-5k'   => 'R$ 3.000 – 5.000',
-    '5k+'    => 'Acima de R$ 5.000',
+    'nao-investe' => 'Ainda não investe em anúncios',
+    'ate-5k'      => 'Menos de R$ 5 mil em anúncios',
+    '5-10k'       => 'R$ 5 a 10 mil em anúncios',
+    '10-20k'      => 'R$ 10 a 20 mil em anúncios',
+    '20-40k'      => 'R$ 20 a 40 mil em anúncios',
+    '40-80k'      => 'R$ 40 a 80 mil em anúncios',
+    '80-150k'     => 'R$ 80 a 150 mil em anúncios',
+    '150-300k'    => 'R$ 150 a 300 mil em anúncios',
+    '300-500k'    => 'R$ 300 a 500 mil em anúncios',
+    '500k+'       => 'Mais de R$ 500 mil em anúncios',
+    'ate-1k'      => 'Até R$ 1.000 (marketing, formulário antigo)',
+    '1-2k'        => 'R$ 1.000 – 2.000 (marketing, formulário antigo)',
+    '2-3k'        => 'R$ 2.000 – 3.000 (marketing, formulário antigo)',
+    '3-5k'        => 'R$ 3.000 – 5.000 (marketing, formulário antigo)',
+    '5k+'         => 'Acima de R$ 5.000 (marketing, formulário antigo)',
 ];
+const CRM_INVESTIMENTO_FORMULARIO = ['nao-investe', 'ate-5k', '5-10k', '10-20k', '20-40k', '40-80k', '80-150k', '150-300k', '300-500k', '500k+'];
 
-/* Faixas que batem com o perfil de cliente da assessoria */
-const CRM_INVESTIMENTO_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
+/* "No perfil" = já anuncia (ou, nos leads antigos, R$ 2 mil+ em marketing) */
+const CRM_INVESTIMENTO_COMPATIVEL = ['ate-5k', '5-10k', '10-20k', '20-40k', '40-80k', '80-150k', '150-300k', '300-500k', '500k+', '2-3k', '3-5k', '5k+'];
 
 const CRM_DESAFIO = [
-    'poucos-leads'             => 'Não conseguimos gerar leads suficientes',
-    'leads-nao-convertem'      => 'Geramos leads, mas poucos viram vendas',
-    'trafego-caro'             => 'Nosso tráfego está caro',
-    'anuncios-sem-performance' => 'Nossos anúncios não estão performando',
-    'estruturar-marketing'     => 'Precisamos estruturar nosso marketing',
+    'poucos-leads'             => 'Não consigo gerar clientes ou leads suficientes',
+    'leads-nao-convertem'      => 'Gero leads, mas as vendas não acompanham',
+    'cac-alto'                 => 'Custo por cliente alto, não consigo crescer com lucro',
+    'lucro-incerto'            => 'Não sei se estou tendo lucro real com os anúncios',
+    'sem-clareza'              => 'Não sei de onde vêm meus resultados (rastreamento)',
+    'resultado-oscila'         => 'O resultado varia demais de um mês para o outro',
+    'agencia-sem-resultado'    => 'Agência ou gestor atual não entrega resultado',
+    'estruturar-marketing'     => 'Preciso estruturar meu marketing do zero',
     'outro'                    => 'Outro',
+    'trafego-caro'             => 'Nosso tráfego está caro (formulário antigo)',
+    'anuncios-sem-performance' => 'Nossos anúncios não estão performando (formulário antigo)',
 ];
+const CRM_DESAFIO_FORMULARIO = ['poucos-leads', 'leads-nao-convertem', 'cac-alto', 'lucro-incerto', 'sem-clareza', 'resultado-oscila', 'agencia-sem-resultado', 'estruturar-marketing', 'outro'];
 
 const CRM_SEGMENTOS = [
     'Clínica / saúde', 'Odontologia', 'Estética e beleza', 'Restaurante / alimentação',
@@ -346,15 +366,23 @@ function crm_migrar(PDO $db): void
         $pontuarDepois = true;
     }
 
+    /* v4: formulário com verba de anúncios e novos desafios; pontuação nova
+       (sem o campo "objetivo"). Repontua todos os leads; não apaga nada. */
+    if ($versao < 4) {
+        $db->exec('PRAGMA user_version = 4');
+        $versao = 4;
+        $repontuarTodos = true;
+    }
+
     /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */
-    if (!empty($pontuarDepois) && function_exists('crm_pontuar')) {
-        $sem = $db->query("SELECT * FROM leads WHERE classe = ''")->fetchAll();
+    if ((!empty($pontuarDepois) || !empty($repontuarTodos)) && function_exists('crm_pontuar')) {
+        $sem = $db->query(!empty($repontuarTodos) ? 'SELECT * FROM leads' : "SELECT * FROM leads WHERE classe = ''")->fetchAll();
         $up = $db->prepare('UPDATE leads SET pontuacao = ?, classe = ?, qualificacao = ?, mql_em = ? WHERE id = ?');
         foreach ($sem as $l) {
             $p = crm_pontuar($l);
             $l['classe'] = $p['classe'];
             $q = crm_calcular_qualificacao($l);
-            $up->execute([$p['total'], $p['classe'], $q, $q !== 'lead' ? $l['criado_em'] : null, $l['id']]);
+            $up->execute([$p['total'], $p['classe'], $q, $q !== 'lead' ? ($l['mql_em'] ?: $l['criado_em']) : $l['mql_em'], $l['id']]);
         }
     }
 }

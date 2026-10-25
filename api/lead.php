@@ -85,7 +85,7 @@ $lead['user_agent'] = crm_texto($_SERVER['HTTP_USER_AGENT'] ?? '', 400);
 
 /* Validação: mesmos campos obrigatórios do formulário */
 $erros = [];
-foreach (['nome', 'whatsapp', 'email', 'empresa', 'site_instagram'] as $campo) {
+foreach (['nome', 'whatsapp', 'email', 'empresa'] as $campo) {
     if ($lead[$campo] === '') {
         $erros[] = $campo;
     }
@@ -100,10 +100,10 @@ if (!filter_var($lead['email'], FILTER_VALIDATE_EMAIL)) {
 if (!in_array($lead['segmento'], CRM_SEGMENTOS, true)) {
     $erros[] = 'segmento';
 }
-if (!isset(CRM_INVESTIMENTO[$lead['investimento']])) {
+if (!in_array($lead['investimento'], CRM_INVESTIMENTO_FORMULARIO, true)) {
     $erros[] = 'investimento';
 }
-if (!isset(CRM_DESAFIO[$lead['desafio']])) {
+if (!in_array($lead['desafio'], CRM_DESAFIO_FORMULARIO, true)) {
     $erros[] = 'desafio';
 }
 if (($dados['consentimento'] ?? '') !== 'sim') {

@@ -12,7 +12,7 @@ deployment:
     - export DEPLOYPATH=$HOME/public_html/jp/
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/mkdir -p ${DEPLOYPATH}logos
-    - /bin/cp index.html $DEPLOYPATH
+    - /bin/cp index.html privacidade.html $DEPLOYPATH
     - /bin/cp logos/*.webp ${DEPLOYPATH}logos/
     - /bin/mkdir -p ${DEPLOYPATH}fotos
     - /bin/cp fotos/*.webp ${DEPLOYPATH}fotos/

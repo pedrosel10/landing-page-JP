@@ -608,7 +608,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .fsteps .done b{background:var(--brown);border-color:var(--brown);color:#fff}
 @media (max-width:420px){.fsteps .t{display:none}.fsteps .on .t{display:inline}}
 .fprog{height:3px;margin-bottom:28px;border-radius:2px;background:var(--cream-2);overflow:hidden}
-.fprog i{display:block;width:33.4%;height:100%;background:var(--wine);transition:width .35s ease}
+.fprog i{display:block;width:50%;height:100%;background:var(--wine);transition:width .35s ease}
 .fstep{display:grid;gap:22px}
 .fstep[hidden]{display:none}
 .fstep-h{font-size:1.45rem;font-weight:400;letter-spacing:-.03em;line-height:1.15}
@@ -617,6 +617,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .field > label,.field legend{padding:0;font-size:14px;font-weight:500}
 .field legend{margin-bottom:8px}
 .field .opt-hint{font-weight:400;color:var(--mute)}
+.field-dica{font-size:12.5px;line-height:1.4;color:var(--mute)}
 fieldset{margin:0;padding:0;border:0;min-width:0}
 .input{width:100%;min-height:50px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:16px;transition:border-color .2s,box-shadow .2s}
 textarea.input{min-height:96px;resize:vertical}
@@ -656,13 +657,6 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 /* ==========================================================================
    OBJEÇÕES + FAQ
    ========================================================================== */
-.objs{display:grid;grid-template-columns:1fr;gap:12px}
-@media (min-width:720px){.objs{grid-template-columns:repeat(2,1fr)}.obj:last-child{grid-column:1/-1}}
-@media (min-width:1080px){.objs{grid-template-columns:repeat(6,1fr)}.obj,.obj:last-child{grid-column:span 2}.obj:nth-child(4){grid-column:2/span 2}}
-.obj{display:grid;align-content:start;gap:14px;padding:clamp(22px,3vw,28px);border-radius:16px;background:var(--paper);border:1px solid var(--line)}
-.obj-q{font-size:clamp(1.15rem,1.7vw,1.35rem);font-weight:400;line-height:1.25;letter-spacing:-.025em}
-.obj-a{font-size:15px;color:var(--ink-2)}
-.obj-a::before{content:"→ ";color:var(--wine);font-family:var(--mono)}
 
 .faq{border-top:1px solid var(--line)}
 .faq-grid{display:grid;gap:36px}
@@ -674,10 +668,14 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 .qa:last-child{border-bottom:1px solid var(--line)}
 .qa summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0;cursor:pointer;list-style:none;font-size:clamp(1.05rem,1.5vw,1.2rem);letter-spacing:-.02em}
 .qa summary::-webkit-details-marker{display:none}
+.qa-n{flex:none;width:44px;font:500 11px/1 var(--mono);letter-spacing:.04em;color:var(--mute)}
+.qa summary{justify-content:flex-start}
+.qa summary::after{margin-left:auto}
 .qa summary::after{content:"";flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:linear-gradient(var(--ink),var(--ink)) center/10px 1.4px no-repeat,linear-gradient(var(--ink),var(--ink)) center/1.4px 10px no-repeat;transition:transform .25s}
 .qa[open] summary::after{transform:rotate(45deg)}
 .qa summary:focus-visible{outline:2px solid var(--wine);outline-offset:4px}
-.qa p{max-width:620px;padding:0 0 24px;color:var(--ink-2)}
+.qa p{max-width:620px;padding:0 0 24px 44px;color:var(--ink-2)}
+@media (max-width:560px){.qa-n{width:34px}.qa p{padding-left:34px}}
 
 /* ==========================================================================
    CTA FINAL + RODAPÉ
@@ -1467,7 +1465,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <h2 class="h2">Do primeiro contato à operação rodando <span class="mute">em 3 passos.</span></h2>
     </div>
     <ol class="steps reveal">
-      <li class="step"><span class="step-n">01</span><h3>Você conta</h3><p>Você apresenta sua empresa, seus objetivos e os principais desafios.</p><span class="step-meta">Formulário · 2 min</span></li>
+      <li class="step"><span class="step-n">01</span><h3>Você conta</h3><p>Você apresenta sua empresa, seus objetivos e os principais desafios.</p><span class="step-meta">Formulário · 1 min</span></li>
       <li class="step"><span class="step-n">02</span><h3>Nós analisamos</h3><p>Entendemos o negócio, o mercado, a oferta, a aquisição e as oportunidades de crescimento.</p><span class="step-meta">Reunião estratégica</span></li>
       <li class="step"><span class="step-n">03</span><h3>Construímos a operação</h3><p>Estratégia, tráfego, criativos, copy, páginas e acompanhamento passam a trabalhar juntos.</p><span class="step-meta">Operação integrada</span></li>
     </ol>
@@ -1512,16 +1510,16 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 </section>
 
 <!-- ======================================================================
-     10 · FORMULÁRIO DE QUALIFICAÇÃO (3 etapas)
+     10 · FORMULÁRIO DE QUALIFICAÇÃO (2 etapas)
      ====================================================================== -->
 <section class="sec dark form-sec" id="formulario">
   <div class="container form-grid">
     <div class="form-copy">
       <span class="tag">Diagnóstico</span>
       <h2 class="h2">Conte-nos sobre <span class="mute">sua empresa.</span></h2>
-      <p class="lead">Leva menos de 2 minutos. Analisamos cada empresa antes da conversa, para que a reunião já comece pelo que importa: o seu crescimento.</p>
+      <p class="lead">Leva menos de 1 minuto. Analisamos cada empresa antes da conversa, para que a reunião já comece pelo que importa: o seu crescimento.</p>
       <ol class="next">
-        <li><span>01</span><div><b>Você preenche o formulário</b><small>Segmento, investimento e principal desafio.</small></div></li>
+        <li><span>01</span><div><b>Você preenche o formulário</b><small>Segmento, verba de anúncios e principal desafio.</small></div></li>
         <li><span>02</span><div><b>Analisamos o perfil da sua empresa</b><small>Em até 1 dia útil.</small></div></li>
         <li><span>03</span><div><b>Agendamos a reunião estratégica</b><small>Contato pelo WhatsApp com um especialista.</small></div></li>
       </ol>
@@ -1532,18 +1530,17 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <div class="fsteps" aria-hidden="true">
         <span class="on"><b>1</b><span class="t">Sua empresa</span></span>
         <span><b>2</b><span class="t">Contato</span></span>
-        <span><b>3</b><span class="t">Finalizar</span></span>
       </div>
       <div class="fprog"><i></i></div>
 
       <form id="lead-form" novalidate>
-        <!-- Etapa 1 — qualificação (perguntas fáceis primeiro) -->
+        <!-- Etapa 1: qualificação (respostas rápidas, em listas) -->
         <div class="fstep" data-step="1">
-          <p class="fstep-h">Sobre a sua empresa<small>Isso nos ajuda a preparar a conversa.</small></p>
+          <p class="fstep-h">Sobre a sua empresa<small>Três respostas rápidas para prepararmos a conversa.</small></p>
           <div class="field">
-            <label for="f-seg">Qual é o segmento da sua empresa?</label>
+            <label for="f-seg">Segmento</label>
             <select class="input" id="f-seg" name="segmento" required>
-              <option value="" disabled selected>Selecione</option>
+              <option value="" disabled selected>Selecione...</option>
               <option>Clínica / saúde</option>
               <option>Odontologia</option>
               <option>Estética e beleza</option>
@@ -1556,31 +1553,42 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
               <option>Outro</option>
             </select>
           </div>
-          <fieldset class="field">
-            <legend>Quanto sua empresa pretende investir mensalmente em marketing?</legend>
-            <div class="opts cols">
-              <label class="opt"><input type="radio" name="investimento" value="ate-1k" required><span>Até R$ 1.000</span></label>
-              <label class="opt"><input type="radio" name="investimento" value="1-2k"><span>R$ 1.000 – 2.000</span></label>
-              <label class="opt"><input type="radio" name="investimento" value="2-3k"><span>R$ 2.000 – 3.000</span></label>
-              <label class="opt"><input type="radio" name="investimento" value="3-5k"><span>R$ 3.000 – 5.000</span></label>
-              <label class="opt"><input type="radio" name="investimento" value="5k+"><span>Acima de R$ 5.000</span></label>
-            </div>
-          </fieldset>
-          <fieldset class="field">
-            <legend>Qual é o principal desafio da sua empresa hoje?</legend>
-            <div class="opts">
-              <label class="opt"><input type="radio" name="desafio" value="poucos-leads" required><span>Não conseguimos gerar leads suficientes</span></label>
-              <label class="opt"><input type="radio" name="desafio" value="leads-nao-convertem"><span>Geramos leads, mas poucos viram vendas</span></label>
-              <label class="opt"><input type="radio" name="desafio" value="trafego-caro"><span>Nosso tráfego está caro</span></label>
-              <label class="opt"><input type="radio" name="desafio" value="anuncios-sem-performance"><span>Nossos anúncios não estão performando</span></label>
-              <label class="opt"><input type="radio" name="desafio" value="estruturar-marketing"><span>Precisamos estruturar nosso marketing</span></label>
-              <label class="opt"><input type="radio" name="desafio" value="outro"><span>Outro</span></label>
-            </div>
-          </fieldset>
+          <div class="field">
+            <label for="f-inv">Quanto você investe (ou pretende investir) por mês em anúncios?</label>
+            <select class="input" id="f-inv" name="investimento" required aria-describedby="f-inv-dica">
+              <option value="" disabled selected>Selecione...</option>
+              <option value="nao-investe">Ainda não invisto em anúncios</option>
+              <option value="ate-5k">Menos de R$ 5 mil</option>
+              <option value="5-10k">De R$ 5.001 até R$ 10 mil</option>
+              <option value="10-20k">De R$ 10.001 até R$ 20 mil</option>
+              <option value="20-40k">De R$ 20.001 até R$ 40 mil</option>
+              <option value="40-80k">De R$ 40.001 até R$ 80 mil</option>
+              <option value="80-150k">De R$ 80.001 até R$ 150 mil</option>
+              <option value="150-300k">De R$ 150.001 até R$ 300 mil</option>
+              <option value="300-500k">De R$ 300.001 até R$ 500 mil</option>
+              <option value="500k+">Mais de R$ 500 mil</option>
+            </select>
+            <small class="field-dica" id="f-inv-dica">Só a verba que vai para as campanhas (Meta, Google etc.), sem contar equipe, agência ou assessoria.</small>
+          </div>
+          <div class="field">
+            <label for="f-desafio">Principal desafio hoje</label>
+            <select class="input" id="f-desafio" name="desafio" required>
+              <option value="" disabled selected>Selecione...</option>
+              <option value="poucos-leads">Não consigo gerar clientes ou leads suficientes</option>
+              <option value="leads-nao-convertem">Gero leads, mas as vendas não acompanham</option>
+              <option value="cac-alto">Custo por cliente alto, não consigo crescer com lucro</option>
+              <option value="lucro-incerto">Não sei se estou tendo lucro real com os anúncios</option>
+              <option value="sem-clareza">Não sei de onde vêm meus resultados (rastreamento)</option>
+              <option value="resultado-oscila">O resultado varia demais de um mês para o outro</option>
+              <option value="agencia-sem-resultado">Agência ou gestor atual não entrega resultado</option>
+              <option value="estruturar-marketing">Preciso estruturar meu marketing do zero</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
           <div class="f-actions"><button type="button" class="btn btn-primary" data-next>Continuar <span class="arr">→</span></button></div>
         </div>
 
-        <!-- Etapa 2 — contato -->
+        <!-- Etapa 2: contato e envio -->
         <div class="fstep" data-step="2" hidden>
           <p class="fstep-h">Como falamos com você?<small>Usamos o WhatsApp para agendar a reunião.</small></p>
           <div class="field"><label for="f-nome">Nome</label><input class="input" id="f-nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome" required></div>
@@ -1588,18 +1596,11 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
             <div class="field"><label for="f-whats">WhatsApp</label><input class="input" id="f-whats" name="whatsapp" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="(00) 00000-0000" pattern="\(\d{2}\) \d{5}-\d{4}" title="Informe DDD + número, ex.: (11) 91234-5678" required></div>
             <div class="field"><label for="f-email">E-mail</label><input class="input" id="f-email" name="email" type="email" autocomplete="email" placeholder="voce@empresa.com.br" required></div>
           </div>
-          <div class="f-actions"><button type="button" class="btn-back" data-back>Voltar</button><button type="button" class="btn btn-primary" data-next>Continuar <span class="arr">→</span></button></div>
-        </div>
-
-        <!-- Etapa 3 — finalizar -->
-        <div class="fstep" data-step="3" hidden>
-          <p class="fstep-h">Último passo<small>Quanto mais contexto, melhor a conversa.</small></p>
           <div class="row2">
             <div class="field"><label for="f-empresa">Empresa</label><input class="input" id="f-empresa" name="empresa" type="text" autocomplete="organization" placeholder="Nome da empresa" required></div>
-            <div class="field"><label for="f-site">Site ou Instagram</label><input class="input" id="f-site" name="site_instagram" type="text" placeholder="@suaempresa ou site" required></div>
+            <div class="field"><label for="f-site">Site ou Instagram <span class="opt-hint">(opcional)</span></label><input class="input" id="f-site" name="site_instagram" type="text" placeholder="@suaempresa ou site"></div>
           </div>
-          <div class="field"><label for="f-meta">O que você gostaria de melhorar nos próximos meses? <span class="opt-hint">(opcional)</span></label><textarea class="input" id="f-meta" name="objetivo" placeholder="Ex.: dobrar os agendamentos, reduzir o custo por lead, organizar o marketing..."></textarea></div>
-          <label class="consent"><input type="checkbox" name="consentimento" value="sim" required><span>Concordo em receber contato da equipe e com a <a href="#" data-privacy>Política de Privacidade</a>.</span></label>
+          <label class="consent"><input type="checkbox" name="consentimento" value="sim" required><span>Concordo em receber contato da equipe e com a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>
           <div class="f-error" role="alert">Não foi possível enviar agora. Tente novamente em instantes.</div>
           <div class="f-actions"><button type="button" class="btn-back" data-back>Voltar</button><button type="submit" class="btn btn-primary" data-submit>Quero falar com um especialista <span class="arr">→</span></button></div>
         </div>
@@ -1620,46 +1621,30 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 </section>
 
 <!-- ======================================================================
-     11 · OBJEÇÕES
+     11 · OBJEÇÕES (perguntas que sempre aparecem)
      ====================================================================== -->
-<section class="sec">
-  <div class="container">
-    <div class="sec-head reveal">
-      <span class="tag">Objeções</span>
-      <h2 class="h2">Talvez você <span class="mute">esteja pensando...</span></h2>
-    </div>
-    <div class="objs">
-      <article class="obj reveal"><p class="obj-q">“Já tenho alguém cuidando dos anúncios.”</p><p class="obj-a">Ótimo. A questão é entender se o restante da operação (oferta, criativos, página e comercial) está acompanhando o tráfego.</p></article>
-      <article class="obj reveal"><p class="obj-q">“Minha empresa ainda é pequena.”</p><p class="obj-a">Nosso foco não é tamanho. É encontrar empresas que estejam prontas para investir e crescer.</p></article>
-      <article class="obj reveal"><p class="obj-q">“Já contratei agência e não funcionou.”</p><p class="obj-a">É justamente por isso que não começamos criando campanhas. Primeiro entendemos negócio, oferta, público e processo de conversão.</p></article>
-      <article class="obj reveal"><p class="obj-q">“Vou precisar contratar vários profissionais?”</p><p class="obj-a">Não. A proposta da assessoria é centralizar diferentes especialidades em uma única operação.</p></article>
-      <article class="obj reveal"><p class="obj-q">“E se o meu negócio for diferente?”</p><p class="obj-a">A estratégia é adaptada ao modelo, ao público, à oferta e ao objetivo de cada empresa.</p></article>
-    </div>
-  </div>
-</section>
-
-<!-- ======================================================================
-     12 · FAQ
-     ====================================================================== -->
-<section class="sec faq">
+<section class="sec faq" id="perguntas">
   <div class="container faq-grid">
     <div class="faq-copy reveal">
-      <span class="tag">FAQ</span>
-      <h2 class="h2">Perguntas <span class="mute">frequentes.</span></h2>
-      <p>Ficou alguma dúvida? <a href="#formulario" data-cta="faq">Conte sobre sua empresa</a> e respondemos na conversa.</p>
+      <span class="tag">Objeções</span>
+      <h2 class="h2">Perguntas que <span class="mute">sempre aparecem.</span></h2>
+      <p>Ficou outra dúvida? <a href="#formulario" data-cta="faq">Conte sobre sua empresa</a> e respondemos na conversa.</p>
     </div>
     <div class="reveal">
-      <details class="qa"><summary>Vocês trabalham apenas com Meta Ads?</summary><p>Não. A estratégia pode envolver diferentes plataformas de aquisição, de acordo com o negócio e o objetivo.</p></details>
-      <details class="qa"><summary>Vocês criam os anúncios?</summary><p>Sim. A assessoria inclui copy, roteiros e desenvolvimento de criativos.</p></details>
-      <details class="qa"><summary>Vocês fazem landing pages?</summary><p>Sim. A estrutura da página faz parte da operação.</p></details>
-      <details class="qa"><summary>Vocês acompanham os resultados?</summary><p>Sim. A operação inclui acompanhamento contínuo, relatório semanal e dashboard.</p></details>
-      <details class="qa"><summary>Vocês atendem qualquer tipo de empresa?</summary><p>Avaliamos o negócio, o objetivo, a estrutura comercial e a capacidade de investimento antes de iniciar uma parceria.</p></details>
+      <details class="qa"><summary><span class="qa-n">01 /</span>Já tenho agência ou gestor de tráfego.</summary><p>Ótimo, então você já investe em mídia. A pergunta é se o resto da operação acompanha o tráfego: oferta, criativos, página e atendimento dos leads. No diagnóstico mostramos onde o resultado está vazando, e você decide se faz sentido mudar.</p></details>
+      <details class="qa"><summary><span class="qa-n">02 /</span>Meus resultados estão razoáveis.</summary><p>Razoável costuma esconder dinheiro na mesa: custo por lead que poderia ser menor, leads que não viram venda, campanhas sem rastreamento. Olhamos os números com você e mostramos o que dá para melhorar antes de qualquer proposta.</p></details>
+      <details class="qa"><summary><span class="qa-n">03 /</span>Como eu sei que preciso de vocês?</summary><p>Se você não sabe com clareza quanto custa cada cliente que vem dos anúncios, ou se os leads chegam mas as vendas não acompanham, vale a conversa. Se isso já está resolvido na sua empresa, a gente mesmo vai te dizer.</p></details>
+      <details class="qa"><summary><span class="qa-n">04 /</span>Já contratei agência e não mudou nada.</summary><p>É justamente por isso que não começamos criando campanhas. Primeiro entendemos negócio, oferta, público e processo comercial. Tráfego sem esse sistema por trás só aumenta o gasto.</p></details>
+      <details class="qa"><summary><span class="qa-n">05 /</span>Isso funciona pro meu segmento?</summary><p>Já atendemos clínicas, educação, imobiliárias, indústria, e-commerce, transporte e empresas de serviços. A estratégia é montada para o seu modelo, público e ticket. Mais do que o tamanho da empresa, importa ter operação comercial funcionando e verba para anunciar com consistência.</p></details>
+      <details class="qa"><summary><span class="qa-n">06 /</span>Por onde o trabalho começa?</summary><p>Por um diagnóstico: entendemos sua operação, seus números e onde estão as maiores oportunidades. Depois montamos o plano com estratégia, campanhas, criativos, páginas e acompanhamento.</p></details>
+      <details class="qa"><summary><span class="qa-n">07 /</span>Vocês assumem a operação ou trabalham com o meu time?</summary><p>Assumimos o marketing de ponta a ponta: estratégia, tráfego, copy, roteiros, criativos e landing pages. Se você já tem alguém interno, como designer ou time comercial, trabalhamos junto, com papéis bem definidos.</p></details>
+      <details class="qa"><summary><span class="qa-n">08 /</span>Como acompanho os resultados?</summary><p>Com relatório semanal e dashboard mostrando o que importa: investimento, leads, custo por lead e vendas. Você sabe para onde cada real está indo.</p></details>
     </div>
   </div>
 </section>
 
 <!-- ======================================================================
-     13 · CTA FINAL
+     12 · CTA FINAL
      ====================================================================== -->
 <section class="final">
   <svg class="hero-lines" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -1681,7 +1666,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
     <p class="lead">Conte-nos sobre sua empresa e descubra como podemos estruturar sua operação de aquisição.</p>
     <div class="cta-group">
       <a class="btn btn-light" href="#formulario" data-cta="final">Quero falar com um especialista <span class="arr">→</span></a>
-      <span class="micro">Leva menos de 2 minutos.</span>
+      <span class="micro">Leva menos de 1 minuto.</span>
     </div>
   </div>
 </section>
@@ -1709,10 +1694,10 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 </g>
 </g></svg>
     </span>
-    <!-- TROCAR: razão social, CNPJ e link real da política de privacidade -->
+    
     <div class="foot-links">
       <span>© <span data-year>2026</span> J.P.Growth · CNPJ 61.512.589/0001-00</span>
-      <a href="#" data-privacy>Política de Privacidade</a>
+      <a href="privacidade.html">Política de Privacidade</a>
     </div>
   </div>
 </footer>
@@ -2010,8 +1995,6 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
     }
   });
 
-  /* Política de privacidade: TROCAR pelo link real */
-  $$('[data-privacy]').forEach(a => a.addEventListener('click', ev => { if (a.getAttribute('href') === '#') ev.preventDefault(); }));
 })();
 </script>
 </body>
