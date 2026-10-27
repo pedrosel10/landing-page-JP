@@ -61,6 +61,7 @@ $lead = [
     'faturamento'    => crm_texto($dados['faturamento'] ?? '', 20),
     'investimento'   => crm_texto($dados['investimento'] ?? '', 20),
     'cargo'          => crm_texto($dados['cargo'] ?? '', 20),
+    'atendimento'    => crm_texto($dados['atendimento'] ?? '', 20),
     'encaixe'        => crm_texto($dados['encaixe'] ?? '', 20),
     'desafio'        => crm_texto($dados['desafio'] ?? '', 40),
     'objetivo'       => crm_texto($dados['objetivo'] ?? '', 2000, true),
@@ -109,6 +110,9 @@ if (!isset(CRM_FATURAMENTO[$lead['faturamento']])) {
 if (!isset(CRM_CARGO[$lead['cargo']])) {
     $erros[] = 'cargo';
 }
+if (!isset(CRM_ATENDIMENTO[$lead['atendimento']])) {
+    $erros[] = 'atendimento';
+}
 if (!isset(CRM_ENCAIXE[$lead['encaixe']])) {
     $erros[] = 'encaixe';
 }
@@ -131,7 +135,7 @@ $lead['criado_em'] = $lead['atualizado_em'] = $lead['etapa_desde'] = crm_agora()
 $pontos = crm_pontuar($lead);
 $lead['pontuacao'] = $pontos['total'];
 $lead['classe'] = $pontos['classe'];
-$lead['perfil'] = $pontos['classe'] === 'A' ? 'compativel' : 'abaixo_do_perfil';
+$lead['perfil'] = $pontos['nivel'] === 'mql' ? 'compativel' : 'abaixo_do_perfil';
 /* Sócio ou dono já conta como "fala com quem decide" no checklist do SQL */
 $lead['qual_decisor'] = $lead['cargo'] === 'socio' ? 1 : 0;
 $lead['qualificacao'] = crm_calcular_qualificacao($lead);
@@ -160,15 +164,15 @@ if (CRM_EMAIL_AVISO !== '') {
         . 'Faturamento: ' . CRM_FATURAMENTO[$lead['faturamento']] . "\n"
         . 'Investimento: ' . CRM_INVESTIMENTO[$lead['investimento']] . "\n"
         . 'Preço da assessoria: ' . CRM_ENCAIXE[$lead['encaixe']] . "\n"
-        . 'Classe: ' . $lead['classe'] . "\n";
+        . 'Qualificação: ' . CRM_QUALIFICACAO[$lead['qualificacao']] . "\n";
     @mail(CRM_EMAIL_AVISO, '=?UTF-8?B?' . base64_encode('Novo lead: ' . $lead['nome']) . '?=', $corpo,
         "Content-Type: text/plain; charset=UTF-8\r\n");
 }
 
 /* Responde ao visitante e só depois conversa com a Meta (ele não espera).
-   "retorno" escolhe a mensagem de agradecimento: A tem prioridade, C não ganha
-   promessa de reunião. */
-$retorno = ['A' => 'prioridade', 'B' => 'padrao', 'C' => 'fora'][$lead['classe']];
+   "retorno" escolhe a mensagem de agradecimento: MQL tem prioridade, desqualificado
+   não ganha promessa de reunião. */
+$retorno = ['mql' => 'prioridade', 'sql' => 'prioridade', 'lead' => 'padrao', 'desqualificado' => 'fora'][$lead['qualificacao']];
 http_response_code(200);
 echo json_encode(['ok' => true, 'retorno' => $retorno]);
 if (crm_liberar_resposta()) {

@@ -8,9 +8,9 @@ $colunas = [
     'id' => 'ID', 'criado_em' => 'Recebido em', 'nome' => 'Nome', 'empresa' => 'Empresa',
     'whatsapp' => 'WhatsApp', 'email' => 'E-mail', 'site_instagram' => 'Site/Instagram',
     'segmento' => 'Segmento', 'faturamento' => 'Faturamento', 'investimento' => 'Verba de anúncios',
-    'cargo' => 'Papel na empresa', 'encaixe' => 'Assessoria a partir de R$ 4 mil', 'perfil' => 'Perfil',
+    'cargo' => 'Papel na empresa', 'atendimento' => 'Quem atende os contatos', 'encaixe' => 'Assessoria a partir de R$ 4 mil', 'perfil' => 'Perfil',
     'desafio' => 'Desafio', 'objetivo' => 'O que quer melhorar', 'status' => 'Etapa',
-    'pontuacao' => 'Pontuação', 'classe' => 'Classe', 'qualificacao' => 'Qualificação',
+    'pontuacao' => 'Pontuação', 'qualificacao' => 'Qualificação',
     'proxima_acao' => 'Próxima ação', 'proxima_acao_em' => 'Próxima ação em', 'valor_mensal' => 'Valor mensal (R$)',
     'motivo_perda' => 'Motivo da perda', 'primeiro_contato_em' => 'Primeiro contato em',
     'utm_source' => 'utm_source', 'utm_medium' => 'utm_medium', 'utm_campaign' => 'utm_campaign',
@@ -37,6 +37,7 @@ while ($l = $st->fetch()) {
     $l['investimento'] = CRM_INVESTIMENTO[$l['investimento']] ?? $l['investimento'];
     $l['cargo'] = CRM_CARGO[$l['cargo']] ?? $l['cargo'];
     $l['encaixe'] = CRM_ENCAIXE[$l['encaixe']] ?? $l['encaixe'];
+    $l['atendimento'] = CRM_ATENDIMENTO[$l['atendimento']] ?? $l['atendimento'];
     $l['desafio'] = CRM_DESAFIO[$l['desafio']] ?? $l['desafio'];
     $l['status'] = CRM_STATUS[$l['status']] ?? $l['status'];
     $l['perfil'] = $l['perfil'] === 'compativel' ? 'No perfil' : 'Abaixo do perfil';

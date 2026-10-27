@@ -1,5 +1,5 @@
 <?php
-/* Lista de leads com busca e filtros (etapa, classe e qualificação) */
+/* Lista de leads com busca e filtros (etapa e qualificação) */
 
 require __DIR__ . '/../inc/crm.php';
 $usuario = crm_exigir_login();
@@ -7,10 +7,8 @@ $db = crm_db();
 
 $busca  = crm_texto($_GET['q'] ?? '', 80);
 $status = (string) ($_GET['status'] ?? '');
-$classe = (string) ($_GET['classe'] ?? '');
 $qual   = (string) ($_GET['qual'] ?? '');
 $status = isset(CRM_STATUS[$status]) ? $status : '';
-$classe = isset(CRM_CLASSES[$classe]) ? $classe : '';
 $qual   = isset(CRM_QUALIFICACAO[$qual]) ? $qual : '';
 $pagina = max(1, (int) ($_GET['p'] ?? 1));
 $porPagina = 50;
@@ -25,10 +23,6 @@ if ($busca !== '') {
 if ($status !== '') {
     $where[] = 'status = ?';
     $args[] = $status;
-}
-if ($classe !== '') {
-    $where[] = 'classe = ?';
-    $args[] = $classe;
 }
 if ($qual !== '') {
     $where[] = 'qualificacao = ?';
@@ -60,7 +54,7 @@ $agora = date('Y-m-d H:i:s');
 function link_filtro(array $mudar): string
 {
     $atual = array_filter([
-        'q' => $_GET['q'] ?? '', 'status' => $_GET['status'] ?? '', 'classe' => $_GET['classe'] ?? '', 'qual' => $_GET['qual'] ?? '',
+        'q' => $_GET['q'] ?? '', 'status' => $_GET['status'] ?? '', 'qual' => $_GET['qual'] ?? '',
     ], 'strlen');
     $novo = array_filter(array_merge($atual, $mudar), function ($v) {
         return $v !== '' && $v !== null;
@@ -92,14 +86,14 @@ crm_topo('Lista de leads', $usuario);
           <b><?= h($n['nome']) ?></b>
           <small><?= h($n['empresa']) ?></small>
           <span class="nv-info"><?= h(crm_resumo_perfil($n)) ?></span>
-          <span class="nv-rodape"><?= crm_selo_classe($n['classe']) ?><span class="nv-abrir">Abrir →</span></span>
+          <span class="nv-rodape"><?= crm_selo_qualificacao($n['qualificacao']) ?><span class="nv-abrir">Abrir →</span></span>
         </a>
       <?php endforeach; ?>
     </div>
   </section>
   <?php endif; ?>
 
-  <form class="filtros filtros-4" method="get" action="lista.php">
+  <form class="filtros filtros-3" method="get" action="lista.php">
     <input type="search" name="q" value="<?= h($busca) ?>" placeholder="Buscar por nome, empresa, e-mail ou WhatsApp" aria-label="Buscar">
     <select name="status" aria-label="Etapa">
       <option value="">Todas as etapas</option>
@@ -107,14 +101,8 @@ crm_topo('Lista de leads', $usuario);
         <option value="<?= h($valor) ?>"<?= $status === $valor ? ' selected' : '' ?>><?= h($rotulo) ?></option>
       <?php endforeach; ?>
     </select>
-    <select name="classe" aria-label="Classe">
-      <option value="">Todas as classes</option>
-      <?php foreach (CRM_CLASSES as $c => $nome): ?>
-        <option value="<?= h($c) ?>"<?= $classe === $c ? ' selected' : '' ?>><?= h($c . ' · ' . $nome) ?></option>
-      <?php endforeach; ?>
-    </select>
     <select name="qual" aria-label="Qualificação">
-      <option value="">Lead, MQL e SQL</option>
+      <option value="">Todas as qualificações</option>
       <?php foreach (CRM_QUALIFICACAO as $q => $nome): ?>
         <option value="<?= h($q) ?>"<?= $qual === $q ? ' selected' : '' ?>><?= h($nome) ?></option>
       <?php endforeach; ?>
@@ -129,7 +117,7 @@ crm_topo('Lista de leads', $usuario);
     <p class="contagem"><?= $total ?> lead<?= $total === 1 ? '' : 's' ?></p>
     <div class="tabela tabela-lista" role="table" aria-label="Leads">
       <div class="linha linha-cab" role="row">
-        <span role="columnheader">Recebido</span><span role="columnheader">Lead</span><span role="columnheader">Classe</span>
+        <span role="columnheader">Recebido</span><span role="columnheader">Lead</span><span role="columnheader">Pontos</span>
         <span role="columnheader">Qualificação</span><span role="columnheader">Etapa</span><span role="columnheader">Próxima ação</span><span role="columnheader"></span>
       </div>
       <?php foreach ($leads as $l): ?>
@@ -137,7 +125,7 @@ crm_topo('Lista de leads', $usuario);
         <div class="linha<?= $l['visto_em'] === null ? ' linha-nova' : '' ?>" role="row">
           <span class="c-data" role="cell"><?= h(crm_data($l['criado_em'])) ?></span>
           <span class="c-lead" role="cell"><a href="lead.php?id=<?= (int) $l['id'] ?>"><b><?php if ($l['visto_em'] === null): ?><span class="ponto" title="Ainda não visto"></span><?php endif; ?><?= h($l['nome']) ?></b><small><?= h($l['empresa']) ?> · <?= h($l['segmento']) ?></small></a></span>
-          <span role="cell"><?= crm_selo_classe($l['classe'], (int) $l['pontuacao']) ?></span>
+          <span role="cell"><?= crm_selo_pontos((int) $l['pontuacao']) ?></span>
           <span role="cell"><?= crm_selo_qualificacao($l['qualificacao']) ?></span>
           <span role="cell"><?= crm_selo_status($l['status']) ?></span>
           <span class="c-acao<?= $atrasada ? ' atrasada' : '' ?>" role="cell"><?= $l['proxima_acao'] !== '' ? h(($l['proxima_acao_em'] ? crm_data($l['proxima_acao_em']) . ' · ' : '') . $l['proxima_acao']) : '<span class="muted">Sem próxima ação</span>' ?></span>

@@ -135,8 +135,8 @@ crm_topo($lead['nome'], $usuario);
       <p class="muted"><?= h($lead['empresa']) ?> · recebido em <?= h(crm_data($lead['criado_em'])) ?></p>
       <div class="selos">
         <?= crm_selo_status($lead['status']) ?>
-        <?= crm_selo_classe($lead['classe'], (int) $lead['pontuacao']) ?>
         <?= crm_selo_qualificacao($lead['qualificacao']) ?>
+        <?= crm_selo_pontos((int) $lead['pontuacao']) ?>
       </div>
     </div>
     <div class="ficha-acoes">
@@ -212,12 +212,25 @@ crm_topo($lead['nome'], $usuario);
       </section>
 
       <section class="cartao">
-        <h2>Qualificação no atendimento</h2>
-        <p class="qual-status"><?= crm_selo_qualificacao($lead['qualificacao']) ?>
-          <?php if ($lead['qualificacao'] === 'sql'): ?> Pronto para venda<?= $lead['sql_em'] ? ' desde ' . h(crm_data($lead['sql_em'])) : '' ?>.
-          <?php elseif ($lead['qualificacao'] === 'mql'): ?> Perfil ideal pelo formulário. Confirme os critérios na conversa para virar SQL.
-          <?php else: ?> Formulário abaixo do perfil. Se a conversa confirmar os critérios, ele vira SQL.<?php endif; ?>
-        </p>
+        <h2>Qualificação</h2>
+        <ol class="escada" aria-label="Nível de qualificação">
+          <?php foreach (CRM_QUALIFICACAO as $q => $nome): ?>
+            <li class="escada-<?= h($q) ?><?= $lead['qualificacao'] === $q ? ' atual' : '' ?>"<?= $lead['qualificacao'] === $q ? ' aria-current="step"' : '' ?>><?= h($nome) ?></li>
+          <?php endforeach; ?>
+        </ol>
+        <p class="qual-status"><?= h(CRM_QUALIFICACAO_DICA[$lead['qualificacao']] ?? '') ?><?= $lead['qualificacao'] === 'sql' && $lead['sql_em'] ? ' SQL desde ' . h(crm_data($lead['sql_em'])) . '.' : '' ?></p>
+
+        <?php if ($pontos['perfil']): ?>
+          <h3 class="sub">Perfil ideal pelo formulário</h3>
+          <ul class="perfil-ideal">
+            <?php foreach ($pontos['perfil'] as $c): ?>
+              <li class="pi-<?= h($c[1]) ?>"><span class="pi-ic" aria-hidden="true"><?= ['ok' => '✓', 'parcial' => '~', 'nao' => '✕', 'sem' => '?'][$c[1]] ?></span><span><b><?= h($c[0]) ?></b><small><?= h($c[2]) ?></small></span></li>
+            <?php endforeach; ?>
+          </ul>
+        <?php endif; ?>
+        <p class="muted regra"><?= h($pontos['regra']) ?></p>
+
+        <h3 class="sub">Confirmado na conversa</h3>
         <form method="post" class="checklist">
           <?= crm_csrf_campo() ?>
           <input type="hidden" name="acao" value="qualificacao"><input type="hidden" name="id" value="<?= (int) $id ?>">
@@ -227,7 +240,7 @@ crm_topo($lead['nome'], $usuario);
               <span><b><?= h($info[0]) ?><?= $info[2] ? ' *' : '' ?></b><small><?= h($info[1]) ?></small></span>
             </label>
           <?php endforeach; ?>
-          <p class="muted regra">* obrigatórios. Vira SQL com os dois obrigatórios e pelo menos 2 dos outros 3.</p>
+          <p class="muted regra">* obrigatórios. Vira SQL com os 4 obrigatórios e pelo menos 1 dos outros 2, mesmo que o formulário tenha dado outro nível.</p>
           <button type="submit" class="btn btn-escuro">Salvar qualificação</button>
         </form>
       </section>
@@ -242,6 +255,7 @@ crm_topo($lead['nome'], $usuario);
           <div><dt>Segmento</dt><dd><?= h($lead['segmento']) ?></dd></div>
           <?php if ($lead['faturamento'] !== ''): ?><div><dt>Faturamento</dt><dd><?= h(CRM_FATURAMENTO[$lead['faturamento']] ?? $lead['faturamento']) ?></dd></div><?php endif; ?>
           <div><dt>Verba de anúncios por mês</dt><dd><?= h(CRM_INVESTIMENTO[$lead['investimento']] ?? $lead['investimento']) ?></dd></div>
+          <?php if ($lead['atendimento'] !== ''): ?><div><dt>Quem atende os contatos</dt><dd><?= h(CRM_ATENDIMENTO[$lead['atendimento']] ?? $lead['atendimento']) ?></dd></div><?php endif; ?>
           <?php if ($lead['cargo'] !== ''): ?><div><dt>Papel na empresa</dt><dd><?= h(CRM_CARGO[$lead['cargo']] ?? $lead['cargo']) ?></dd></div><?php endif; ?>
           <?php if ($lead['encaixe'] !== ''): ?><div class="largo"><dt>Assessoria a partir de R$ 4 mil/mês</dt><dd><?= h(CRM_ENCAIXE[$lead['encaixe']] ?? $lead['encaixe']) ?></dd></div><?php endif; ?>
           <div class="largo"><dt>Principal desafio</dt><dd><?= h(CRM_DESAFIO[$lead['desafio']] ?? $lead['desafio']) ?></dd></div>
@@ -262,15 +276,14 @@ crm_topo($lead['nome'], $usuario);
     <div class="ficha-col">
       <section class="cartao">
         <h2>Pontuação do formulário</h2>
-        <div class="placar placar-<?= h(strtolower($pontos['classe'])) ?>">
-          <b><?= (int) $pontos['total'] ?></b><span>de 100 · Classe <?= h($pontos['classe']) ?> (<?= h(CRM_CLASSES[$pontos['classe']]) ?>)</span>
+        <div class="placar placar-<?= h($pontos['nivel']) ?>">
+          <b><?= (int) $pontos['total'] ?></b><span>de 100 · ordena a prioridade dentro do nível</span>
         </div>
         <ul class="pontos">
           <?php foreach ($pontos['itens'] as $item): ?>
             <li><span><?= h($item[0]) ?></span><b><?= (int) $item[1] ?>/<?= (int) $item[2] ?></b></li>
           <?php endforeach; ?>
         </ul>
-        <p class="muted regra"><?= h($pontos['regra']) ?></p>
       </section>
 
       <section class="cartao">

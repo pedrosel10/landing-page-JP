@@ -21,23 +21,23 @@ O funil em kanban (`admin/index.php`) permite arrastar os cards; cada etapa tem 
 e o card ganha o alerta "parado há X dias" quando passa dele. Cada lead tem uma
 **próxima ação com data**; as atrasadas ficam em vermelho.
 
-**Pontuação do formulário (0 a 100) → classe:** faturamento (30), verba mensal de
-anúncios (25), resposta ao preço da assessoria (15), desafio (10), segmento (8),
-papel na empresa (7), site ou rede social (3) e e-mail da empresa (2).
-A classe segue regras de corte:
-- **C sempre:** fatura até R$ 50 mil, diz que a assessoria (a partir de R$ 4 mil) não
-  cabe no orçamento, ou investe até R$ 2.500 em anúncios e fatura menos de R$ 100 mil.
-- **A:** fatura R$ 100 mil+, investe R$ 2.500+ em anúncios e quer começar agora.
-- **O resto:** B com 45 pontos ou mais, C abaixo disso.
+**Qualificação, do menos ao mais qualificado.** Cliente ideal: fatura a partir de
+R$ 100 mil por mês, já investe ou já investiu em tráfego, entende que precisa de verba
+relevante e constante e de um bom atendimento, e topa pagar cerca de R$ 4 mil por mês.
 
-Leads de antes de 27/10/2026 (sem faturamento) mantêm a regra anterior. Regras em
-`inc/funil.php`. A página mostra uma mensagem de agradecimento diferente para cada
-classe: A tem prioridade, C não recebe promessa de reunião.
+| Nível | Quando |
+|---|---|
+| **Desqualificado** | Critério eliminatório: fatura até R$ 50 mil; assessoria "não cabe no orçamento"; nunca investiu em tráfego (ou investe até R$ 2.500) e fatura menos de R$ 100 mil; nunca investiu e não tem quem atenda os leads. |
+| **Lead** | Parcialmente qualificado: não foi eliminado, mas falta algum critério (ex.: fatura R$ 50 a 100 mil, quer começar daqui a meses, o dono atende quando dá). |
+| **MQL** | O formulário cumpre os 5 critérios: fatura R$ 100 mil+, já investe ou investiu, verba de R$ 2.500+ (ou anúncios parados), tem quem atenda os leads e quer começar agora. Vai para a Meta como evento MQL. |
+| **SQL** | Confirmado na conversa: aceita o investimento, fala com quem decide, vai manter verba constante e tem atendimento pronto (os 4 obrigatórios), mais dor clara ou começo em até 60 dias. Vale mesmo que o formulário tenha dado outro nível. |
 
-**Lead → MQL → SQL:** vira MQL automaticamente quando o formulário é classe A (leads
-antigos: A ou B). Quem se declara sócio ou dono já entra com "decisor" marcado.
-Vira SQL no atendimento, quando a lista confirma orçamento e decisor, mais 2 de 3:
-dor clara, quer começar em até 60 dias, operação comercial pronta.
+A ficha do lead mostra a escada, os 5 critérios do perfil ideal (✓, ~ ou ✕) e por que
+o lead está naquele nível. A pontuação de 0 a 100 só ordena a prioridade dentro do nível.
+Quem se declara sócio ou dono já entra com "decisor" marcado. Regras em `inc/funil.php`.
+A página mostra um agradecimento para cada nível: MQL tem prioridade, desqualificado não
+recebe promessa de reunião. Leads do formulário antigo (sem faturamento) mantêm a regra
+da época.
 
 **Integrações (`admin/integracoes.php`):**
 - Meta (API de Conversões): envia Lead, MQL, SQL, Schedule (reunião) e Purchase

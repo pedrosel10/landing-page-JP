@@ -82,6 +82,8 @@ const CRM_FATURAMENTO = [
    As faixas antigas continuam aqui para exibir os leads que chegaram
    antes das mudanças no formulário. */
 const CRM_INVESTIMENTO = [
+    'nunca'       => 'Nunca investiu em anúncios',
+    'parou'       => 'Já investiu, mas está parado',
     'nao-investe' => 'Ainda não investe em anúncios',
     'ate-2500'    => 'Até R$ 2.500 em anúncios',
     '2500-5k'     => 'R$ 2.500 a 5 mil em anúncios',
@@ -102,13 +104,21 @@ const CRM_INVESTIMENTO = [
     '3-5k'        => 'R$ 3.000 – 5.000 (marketing, formulário antigo)',
     '5k+'         => 'Acima de R$ 5.000 (marketing, formulário antigo)',
 ];
-const CRM_INVESTIMENTO_FORMULARIO = ['nao-investe', 'ate-2500', '2500-5k', '5-10k', '10-20k', '20-50k', '50k+'];
+const CRM_INVESTIMENTO_FORMULARIO = ['nunca', 'parou', 'ate-2500', '2500-5k', '5-10k', '10-20k', '20-50k', '50k+'];
 
 const CRM_CARGO = [
     'socio'     => 'Sócio ou dono',
     'diretor'   => 'Diretor ou gerente',
     'marketing' => 'Marketing',
     'outro'     => 'Outro',
+];
+
+/* Quem atende os contatos que chegam dos anúncios (formulário a partir de 27/10/2026) */
+const CRM_ATENDIMENTO = [
+    'processo' => 'Equipe comercial com processo definido',
+    'equipe'   => 'Pessoa ou equipe dedicada, sem processo definido',
+    'dono'     => 'O dono ou alguém da equipe, quando dá',
+    'ninguem'  => 'Ainda não tem quem atenda',
 ];
 
 /* Resposta à pergunta "a assessoria parte de R$ 4 mil por mês, faz sentido?" */
@@ -415,6 +425,30 @@ function crm_migrar(PDO $db): void
         $versao = 5;
     }
 
+    /* v6: pergunta de atendimento, critério "verba constante" no SQL e a escada
+       desqualificado → lead → MQL → SQL. Reclassifica pelo formulário quem ainda não
+       é SQL, sem mandar eventos para a Meta. Não apaga nada. */
+    if ($versao < 6) {
+        $db->exec('BEGIN');
+        $existentes = array_column($db->query('PRAGMA table_info(leads)')->fetchAll(), 'name');
+        if (!in_array('atendimento', $existentes, true)) {
+            $db->exec("ALTER TABLE leads ADD COLUMN atendimento TEXT NOT NULL DEFAULT ''");
+        }
+        if (!in_array('qual_verba', $existentes, true)) {
+            $db->exec('ALTER TABLE leads ADD COLUMN qual_verba INTEGER NOT NULL DEFAULT 0');
+        }
+        $db->exec('PRAGMA user_version = 6');
+        $db->exec('COMMIT');
+        $versao = 6;
+        if (function_exists('crm_pontuar')) {
+            $up = $db->prepare('UPDATE leads SET pontuacao = ?, classe = ?, qualificacao = ? WHERE id = ?');
+            foreach ($db->query("SELECT * FROM leads WHERE qualificacao <> 'sql'")->fetchAll() as $l) {
+                $p = crm_pontuar($l);
+                $up->execute([$p['total'], $p['classe'], $p['nivel'], $l['id']]);
+            }
+        }
+    }
+
     /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */
     if ((!empty($pontuarDepois) || !empty($repontuarTodos)) && function_exists('crm_pontuar')) {
         $sem = $db->query(!empty($repontuarTodos) ? 'SELECT * FROM leads' : "SELECT * FROM leads WHERE classe = ''")->fetchAll();
@@ -423,7 +457,7 @@ function crm_migrar(PDO $db): void
             $p = crm_pontuar($l);
             $l['classe'] = $p['classe'];
             $q = crm_calcular_qualificacao($l);
-            $up->execute([$p['total'], $p['classe'], $q, $q !== 'lead' ? ($l['mql_em'] ?: $l['criado_em']) : $l['mql_em'], $l['id']]);
+            $up->execute([$p['total'], $p['classe'], $q, in_array($q, ['mql', 'sql'], true) ? ($l['mql_em'] ?: $l['criado_em']) : $l['mql_em'], $l['id']]);
         }
     }
 }
@@ -714,7 +748,7 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=7">
+<link rel="stylesheet" href="assets/admin.css?v=8">
 <script src="assets/admin.js?v=3" defer></script>
 </head>
 <body class="<?= h($classe) ?>">

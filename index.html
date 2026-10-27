@@ -1521,7 +1521,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <h2 class="h2">Conte-nos sobre <span class="mute">sua empresa.</span></h2>
       <p class="lead">Leva menos de 1 minuto. Analisamos cada empresa antes da conversa, para que a reunião já comece pelo que importa: o seu crescimento.</p>
       <ol class="next">
-        <li><span>01</span><div><b>Você preenche o formulário</b><small>Faturamento, verba de anúncios e principal desafio.</small></div></li>
+        <li><span>01</span><div><b>Você preenche o formulário</b><small>Faturamento, anúncios, atendimento e principal desafio.</small></div></li>
         <li><span>02</span><div><b>Analisamos o perfil da sua empresa</b><small>Em até 1 dia útil.</small></div></li>
         <li><span>03</span><div><b>Agendamos a reunião estratégica</b><small>Contato pelo WhatsApp com um especialista.</small></div></li>
       </ol>
@@ -1538,7 +1538,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <form id="lead-form" novalidate>
         <!-- Etapa 1: qualificação (respostas rápidas, em listas) -->
         <div class="fstep" data-step="1">
-          <p class="fstep-h">Sobre a sua empresa<small>Quatro respostas rápidas para prepararmos a conversa.</small></p>
+          <p class="fstep-h">Sobre a sua empresa<small>Cinco respostas rápidas para prepararmos a conversa.</small></p>
           <div class="field">
             <label for="f-fat">Quanto sua empresa fatura por mês?</label>
             <select class="input" id="f-fat" name="faturamento" required>
@@ -1556,7 +1556,8 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
             <label for="f-inv">Quanto você investe hoje por mês em anúncios?</label>
             <select class="input" id="f-inv" name="investimento" required aria-describedby="f-inv-dica">
               <option value="" disabled selected>Selecione...</option>
-              <option value="nao-investe">Ainda não invisto em anúncios</option>
+              <option value="nunca">Nunca investi em anúncios</option>
+              <option value="parou">Já investi, mas estou parado agora</option>
               <option value="ate-2500">Até R$ 2.500</option>
               <option value="2500-5k">De R$ 2.500 a R$ 5 mil</option>
               <option value="5-10k">De R$ 5 mil a R$ 10 mil</option>
@@ -1565,6 +1566,16 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
               <option value="50k+">Mais de R$ 50 mil</option>
             </select>
             <small class="field-dica" id="f-inv-dica">Só a verba que vai para as campanhas (Meta, Google etc.), sem contar equipe, agência ou assessoria.</small>
+          </div>
+          <div class="field">
+            <label for="f-atend">Quem atende os contatos que chegam pelos anúncios?</label>
+            <select class="input" id="f-atend" name="atendimento" required>
+              <option value="" disabled selected>Selecione...</option>
+              <option value="processo">Equipe comercial com processo definido (CRM, follow-up)</option>
+              <option value="equipe">Uma pessoa ou equipe dedicada, sem processo definido</option>
+              <option value="dono">Eu mesmo(a) ou alguém da equipe, quando dá</option>
+              <option value="ninguem">Ainda não temos quem atenda</option>
+            </select>
           </div>
           <div class="field">
             <label for="f-seg">Segmento</label>

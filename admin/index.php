@@ -5,15 +5,15 @@ require __DIR__ . '/../inc/crm.php';
 $usuario = crm_exigir_login();
 $db = crm_db();
 
-$classe = (string) ($_GET['classe'] ?? '');
-$classe = isset(CRM_CLASSES[$classe]) ? $classe : '';
+$qual = (string) ($_GET['qual'] ?? '');
+$qual = isset(CRM_QUALIFICACAO[$qual]) ? $qual : '';
 $busca = crm_texto($_GET['q'] ?? '', 80);
 
 $where = "(status IN ('novo','atendimento','agendada','realizada','proposta') OR (status IN ('ganho','perdido') AND fechado_em >= ?))";
 $args = [date('Y-m-d H:i:s', time() - 30 * 86400)];
-if ($classe !== '') {
-    $where .= ' AND classe = ?';
-    $args[] = $classe;
+if ($qual !== '') {
+    $where .= ' AND qualificacao = ?';
+    $args[] = $qual;
 }
 if ($busca !== '') {
     $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $busca) . '%';
@@ -49,6 +49,7 @@ unset($cards);
 $desde = date('Y-m-d H:i:s', time() - 30 * 86400);
 $st = $db->prepare("SELECT COUNT(*) total,
     SUM(qualificacao IN ('mql','sql')) mql,
+    SUM(qualificacao = 'desqualificado') desq,
     SUM(qualificacao = 'sql') sqls,
     SUM(agendada_em IS NOT NULL) reunioes,
     SUM(status = 'ganho') vendas,
@@ -114,19 +115,19 @@ crm_topo('Funil', $usuario, 'pagina-funil');
       </div>
       <form class="funil-filtros" method="get" action="index.php">
         <input type="search" name="q" value="<?= h($busca) ?>" placeholder="Buscar lead" aria-label="Buscar lead">
-        <select name="classe" aria-label="Classe">
-          <option value="">Todas as classes</option>
-          <?php foreach (CRM_CLASSES as $c => $nome): ?>
-            <option value="<?= h($c) ?>"<?= $classe === $c ? ' selected' : '' ?>><?= h($c . ' · ' . $nome) ?></option>
+        <select name="qual" aria-label="Qualificação">
+          <option value="">Todas as qualificações</option>
+          <?php foreach (CRM_QUALIFICACAO as $q => $nome): ?>
+            <option value="<?= h($q) ?>"<?= $qual === $q ? ' selected' : '' ?>><?= h($nome) ?></option>
           <?php endforeach; ?>
         </select>
         <button class="btn btn-escuro" type="submit">Filtrar</button>
-        <?php if ($classe !== '' || $busca !== ''): ?><a class="limpar" href="index.php">Limpar</a><?php endif; ?>
+        <?php if ($qual !== '' || $busca !== ''): ?><a class="limpar" href="index.php">Limpar</a><?php endif; ?>
       </form>
     </div>
 
     <section class="kpis kpis-6" aria-label="Indicadores dos últimos 30 dias">
-      <div class="kpi"><span>Leads · 30 dias</span><b><?= (int) $k['total'] ?></b><small>recebidos</small></div>
+      <div class="kpi"><span>Leads · 30 dias</span><b><?= (int) $k['total'] ?></b><small><?= (int) $k['desq'] ?> desqualificado<?= (int) $k['desq'] === 1 ? '' : 's' ?></small></div>
       <div class="kpi"><span>MQL</span><b><?= (int) $k['mql'] ?></b><small><?= pct($k['mql'], $k['total']) ?> dos leads</small></div>
       <div class="kpi"><span>SQL</span><b><?= (int) $k['sqls'] ?></b><small><?= pct($k['sqls'], $k['mql']) ?> dos MQL</small></div>
       <div class="kpi"><span>Reuniões</span><b><?= (int) $k['reunioes'] ?></b><small>agendadas</small></div>
@@ -161,8 +162,7 @@ crm_topo('Funil', $usuario, 'pagina-funil');
             <a class="card<?= $l['visto_em'] === null ? ' card-novo' : '' ?>" href="lead.php?id=<?= (int) $l['id'] ?>" draggable="true" data-id="<?= (int) $l['id'] ?>">
               <span class="card-selos">
                 <?php if ($l['visto_em'] === null): ?><span class="ponto" title="Ainda não visto"></span><?php endif; ?>
-                <?= crm_selo_classe($l['classe']) ?>
-                <?php if ($l['qualificacao'] !== 'lead'): ?><?= crm_selo_qualificacao($l['qualificacao']) ?><?php endif; ?>
+                <?= crm_selo_qualificacao($l['qualificacao']) ?>
               </span>
               <b class="card-nome"><?= h($l['nome']) ?></b>
               <small class="card-empresa"><?= h($l['empresa']) ?></small>
