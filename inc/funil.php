@@ -37,11 +37,12 @@ const CRM_MOTIVOS_PERDA = [
 
 /* ------------------------------------------------- qualificação MQL / SQL
    Lead: entrou pelo formulário.
-   MQL (Marketing Qualified Lead): o formulário indica bom perfil (classe A ou B).
+   MQL (Marketing Qualified Lead): o formulário indica o perfil ideal (classe A;
+   nos leads de antes de 27/10/2026, A ou B).
    SQL (Sales Qualified Lead): confirmado na conversa: orçamento E decisor,
    mais pelo menos 2 dos outros 3 critérios. */
 const CRM_CRITERIOS_SQL = [
-    'qual_orcamento' => ['Orçamento confirmado', 'Pode pagar R$ 2 mil+ por mês pela assessoria, além da verba de anúncios.', true],
+    'qual_orcamento' => ['Orçamento confirmado', 'Pode pagar a partir de R$ 4 mil por mês pela assessoria, além da verba de anúncios.', true],
     'qual_decisor'   => ['Fala com quem decide', 'É dono, sócio ou quem aprova a contratação.', true],
     'qual_dor'       => ['Dor clara', 'Tem um problema concreto que a assessoria resolve.', false],
     'qual_momento'   => ['Quer começar logo', 'Pretende começar em até 60 dias.', false],
@@ -56,10 +57,26 @@ const CRM_QUALIFICACAO = [
 
 /* -------------------------------------------- pontuação do formulário
    0 a 100 pontos, só com as respostas do formulário (perfil/fit):
+   faturamento (30) + verba de anúncios (25) + encaixe no preço (15) + desafio (10)
+   + segmento (8) + papel na empresa (7) + site/rede (3) + e-mail da empresa (2).
+   A classe segue regras de corte, não só a soma:
+   · C sempre: fatura até R$ 50 mil, diz que a assessoria não cabe no orçamento,
+     ou investe até R$ 2.500 em anúncios e fatura menos de R$ 100 mil.
+   · A: fatura R$ 100 mil+, investe R$ 2.500+ em anúncios e quer começar agora.
+   · O resto: B com 45 pontos ou mais, C abaixo disso.
+   Só classe A vira MQL, para a Meta aprender com quem está no perfil. */
+const CRM_PONTOS_FATURAMENTO = ['ate-50k' => 0, '50-100k' => 12, '100-200k' => 22, '200-500k' => 27, '500k-1mi' => 30, '1-5mi' => 30, '5mi+' => 30];
+const CRM_FATURAMENTO_MINIMO = ['100-200k', '200-500k', '500k-1mi', '1-5mi', '5mi+'];
+const CRM_PONTOS_VERBA = ['nao-investe' => 4, 'ate-2500' => 8, '2500-5k' => 18, '5-10k' => 22, '10-20k' => 25, '20-50k' => 25, '50k+' => 25];
+const CRM_VERBA_ABAIXO = ['nao-investe', 'ate-2500'];
+const CRM_PONTOS_ENCAIXE = ['agora' => 15, 'depois' => 7, 'nao-cabe' => 0];
+const CRM_PONTOS_CARGO = ['socio' => 7, 'diretor' => 5, 'marketing' => 3, 'outro' => 1];
+const CRM_SEGMENTOS_MARGEM_BAIXA = ['Restaurante / alimentação', 'Loja / varejo'];
+
+/* Regra anterior (leads de antes de 27/10/2026, sem faturamento):
    verba de anúncios (45) + desafio (25) + segmento (15) + site/rede (10) + e-mail da empresa (5).
-   A (quente) >= 70 · B (morno) >= 45 · C (frio) abaixo disso.
-   Quem ainda não anuncia fica no máximo em B. (Faixas antigas, de investimento
-   total em marketing: até R$ 1 mil é sempre C; até R$ 2 mil, no máximo B.) */
+   A >= 70 · B >= 45 · C abaixo disso. Quem ainda não anunciava ficava no máximo em B.
+   (Faixas de investimento total em marketing: até R$ 1 mil sempre C; até R$ 2 mil, no máximo B.) */
 const CRM_PONTOS_INVESTIMENTO = [
     'nao-investe' => 8, 'ate-5k' => 22, '5-10k' => 34, '10-20k' => 40,
     '20-40k' => 45, '40-80k' => 45, '80-150k' => 45, '150-300k' => 45, '300-500k' => 45, '500k+' => 45,
@@ -87,8 +104,90 @@ const CRM_CLASSES = [
     'C' => 'Frio',
 ];
 
-/* Devolve ['total' => int, 'classe' => 'A'|'B'|'C', 'itens' => [[rótulo, pontos, máximo], ...]] */
+/* Site ou rede social e e-mail com domínio próprio: sinais de empresa estruturada */
+function crm_itens_presenca(array $lead, int $maxSite, int $maxRede, int $maxEmail): array
+{
+    $site = trim((string) ($lead['site_instagram'] ?? ''));
+    if (preg_match('~^(https?://)?(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(/\S*)?$~i', $site) && strpos($site, '@') !== 0) {
+        $item = ['Tem site próprio', $maxSite, $maxSite];
+    } elseif ($site !== '') {
+        $item = ['Tem Instagram ou rede social', $maxRede, $maxSite];
+    } else {
+        $item = ['Sem site ou rede informada', 0, $maxSite];
+    }
+    $dominio = strtolower((string) substr(strrchr((string) ($lead['email'] ?? ''), '@') ?: '', 1));
+    $pEmail = ($dominio !== '' && !in_array($dominio, CRM_EMAILS_GRATUITOS, true)) ? $maxEmail : 0;
+    return [$item, [$pEmail ? 'E-mail com domínio da empresa' : 'E-mail pessoal (Gmail, Hotmail...)', $pEmail, $maxEmail]];
+}
+
+/* Devolve ['total' => int, 'classe' => 'A'|'B'|'C', 'regra' => texto, 'itens' => [[rótulo, pontos, máximo], ...]] */
 function crm_pontuar(array $lead): array
+{
+    $fat = (string) ($lead['faturamento'] ?? '');
+    if ($fat === '') {
+        return crm_pontuar_v4($lead);
+    }
+    $inv = (string) ($lead['investimento'] ?? '');
+    $enc = (string) ($lead['encaixe'] ?? '');
+    $des = (string) ($lead['desafio'] ?? '');
+    $seg = (string) ($lead['segmento'] ?? '');
+    $cargo = (string) ($lead['cargo'] ?? '');
+
+    if (in_array($seg, CRM_SEGMENTOS_PRIORITARIOS, true)) {
+        $pSeg = 8;
+    } elseif (in_array($seg, CRM_SEGMENTOS_MARGEM_BAIXA, true)) {
+        $pSeg = 2;
+    } else {
+        $pSeg = ($seg === 'Outro' || $seg === '') ? 3 : 6;
+    }
+    $itens = [
+        ['Faturamento: ' . (CRM_FATURAMENTO[$fat] ?? 'não informado'), CRM_PONTOS_FATURAMENTO[$fat] ?? 0, 30],
+        ['Verba: ' . (CRM_INVESTIMENTO[$inv] ?? 'não informada'), CRM_PONTOS_VERBA[$inv] ?? 0, 25],
+        ['Preço da assessoria: ' . (CRM_ENCAIXE[$enc] ?? 'não respondeu'), CRM_PONTOS_ENCAIXE[$enc] ?? 0, 15],
+        ['Desafio: ' . (CRM_DESAFIO[$des] ?? 'não informado'), (int) round((CRM_PONTOS_DESAFIO[$des] ?? 0) * 10 / 25), 10],
+        ['Segmento: ' . ($seg !== '' ? $seg : 'não informado'), $pSeg, 8],
+        ['Papel: ' . (CRM_CARGO[$cargo] ?? 'não informado'), CRM_PONTOS_CARGO[$cargo] ?? 0, 7],
+    ];
+    $itens = array_merge($itens, crm_itens_presenca($lead, 3, 2, 2));
+    $total = 0;
+    foreach ($itens as $item) {
+        $total += $item[1];
+    }
+
+    $fatOk = in_array($fat, CRM_FATURAMENTO_MINIMO, true);
+    $verbaOk = !in_array($inv, CRM_VERBA_ABAIXO, true);
+    if ($fat === 'ate-50k') {
+        $classe = 'C';
+        $regra = 'Fatura até R$ 50 mil por mês: sempre C.';
+    } elseif ($enc === 'nao-cabe') {
+        $classe = 'C';
+        $regra = 'Disse que a assessoria ainda não cabe no orçamento: sempre C.';
+    } elseif ($inv === 'ate-2500' && !$fatOk) {
+        $classe = 'C';
+        $regra = 'Investe até R$ 2.500 em anúncios e fatura menos de R$ 100 mil: sempre C.';
+    } elseif ($fatOk && $verbaOk && $enc === 'agora') {
+        $classe = 'A';
+        $regra = 'Fatura R$ 100 mil+, investe R$ 2.500+ em anúncios e quer começar agora: A.';
+    } else {
+        $classe = $total >= 45 ? 'B' : 'C';
+        $falta = [];
+        if (!$fatOk) {
+            $falta[] = 'fatura menos de R$ 100 mil';
+        }
+        if (!$verbaOk) {
+            $falta[] = $inv === 'nao-investe' ? 'ainda não anuncia' : 'investe menos de R$ 2.500';
+        }
+        if ($enc !== 'agora') {
+            $falta[] = 'quer começar só daqui a alguns meses';
+        }
+        $regra = 'Não é A porque ' . implode(', ', $falta) . '. Com 45 pontos ou mais fica B; abaixo disso, C.';
+    }
+
+    return ['total' => min(100, $total), 'classe' => $classe, 'regra' => $regra, 'itens' => $itens];
+}
+
+/* Regra anterior, para os leads que chegaram sem faturamento */
+function crm_pontuar_v4(array $lead): array
 {
     $itens = [];
 
@@ -102,22 +201,7 @@ function crm_pontuar(array $lead): array
     $pSeg = in_array($seg, CRM_SEGMENTOS_PRIORITARIOS, true) ? 15 : ($seg === 'Outro' || $seg === '' ? 4 : 10);
     $itens[] = ['Segmento: ' . ($seg !== '' ? $seg : 'não informado'), $pSeg, 15];
 
-    $site = trim((string) ($lead['site_instagram'] ?? ''));
-    if (preg_match('~^(https?://)?(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(/\S*)?$~i', $site) && strpos($site, '@') !== 0) {
-        $pSite = 10;
-        $rotSite = 'Tem site próprio';
-    } elseif ($site !== '') {
-        $pSite = 6;
-        $rotSite = 'Tem Instagram ou rede social';
-    } else {
-        $pSite = 0;
-        $rotSite = 'Sem site ou rede informada';
-    }
-    $itens[] = [$rotSite, $pSite, 10];
-
-    $dominio = strtolower((string) substr(strrchr((string) ($lead['email'] ?? ''), '@') ?: '', 1));
-    $pEmail = ($dominio !== '' && !in_array($dominio, CRM_EMAILS_GRATUITOS, true)) ? 5 : 0;
-    $itens[] = [$pEmail ? 'E-mail com domínio da empresa' : 'E-mail pessoal (Gmail, Hotmail...)', $pEmail, 5];
+    $itens = array_merge($itens, crm_itens_presenca($lead, 10, 6, 5));
 
     $total = 0;
     foreach ($itens as $item) {
@@ -131,7 +215,19 @@ function crm_pontuar(array $lead): array
         $classe = 'B';
     }
 
-    return ['total' => min(100, $total), 'classe' => $classe, 'itens' => $itens];
+    return ['total' => min(100, $total), 'classe' => $classe, 'regra' => 'Regra anterior (formulário sem faturamento): A 70+, B 45 a 69, C abaixo de 45. Quem ainda não anunciava fica no máximo em B.', 'itens' => $itens];
+}
+
+/* Resumo curto para cards e listas: "Clínica / saúde · Fatura R$ 100 a 200 mil · R$ 5 a 10 mil em anúncios" */
+function crm_resumo_perfil(array $l): string
+{
+    $partes = [(string) ($l['segmento'] ?? '')];
+    $fat = (string) ($l['faturamento'] ?? '');
+    if (isset(CRM_FATURAMENTO[$fat])) {
+        $partes[] = 'Fatura ' . str_replace(['Até', 'Mais de', ' por mês'], ['até', 'mais de', ''], CRM_FATURAMENTO[$fat]);
+    }
+    $partes[] = CRM_INVESTIMENTO[$l['investimento'] ?? ''] ?? '';
+    return implode(' · ', array_filter($partes, 'strlen'));
 }
 
 /* Qualificação a partir da classe do formulário e do checklist do atendimento */
@@ -150,7 +246,9 @@ function crm_calcular_qualificacao(array $lead): string
     if ($obrigatorios && $extras >= 2) {
         return 'sql';
     }
-    return in_array($lead['classe'] ?? '', ['A', 'B'], true) ? 'mql' : 'lead';
+    /* Formulário atual: só classe A é MQL. Leads antigos: A ou B. */
+    $classesMql = ($lead['faturamento'] ?? '') !== '' ? ['A'] : ['A', 'B'];
+    return in_array($lead['classe'] ?? '', $classesMql, true) ? 'mql' : 'lead';
 }
 
 /* Recalcula e grava a qualificação. Na primeira vez que vira MQL ou SQL,

@@ -58,7 +58,10 @@ $lead = [
     'empresa'        => crm_texto($dados['empresa'] ?? '', 160),
     'site_instagram' => crm_texto($dados['site_instagram'] ?? '', 200),
     'segmento'       => crm_texto($dados['segmento'] ?? '', 60),
+    'faturamento'    => crm_texto($dados['faturamento'] ?? '', 20),
     'investimento'   => crm_texto($dados['investimento'] ?? '', 20),
+    'cargo'          => crm_texto($dados['cargo'] ?? '', 20),
+    'encaixe'        => crm_texto($dados['encaixe'] ?? '', 20),
     'desafio'        => crm_texto($dados['desafio'] ?? '', 40),
     'objetivo'       => crm_texto($dados['objetivo'] ?? '', 2000, true),
     'variante'       => crm_texto($dados['variante_headline'] ?? '', 4),
@@ -100,6 +103,15 @@ if (!filter_var($lead['email'], FILTER_VALIDATE_EMAIL)) {
 if (!in_array($lead['segmento'], CRM_SEGMENTOS, true)) {
     $erros[] = 'segmento';
 }
+if (!isset(CRM_FATURAMENTO[$lead['faturamento']])) {
+    $erros[] = 'faturamento';
+}
+if (!isset(CRM_CARGO[$lead['cargo']])) {
+    $erros[] = 'cargo';
+}
+if (!isset(CRM_ENCAIXE[$lead['encaixe']])) {
+    $erros[] = 'encaixe';
+}
 if (!in_array($lead['investimento'], CRM_INVESTIMENTO_FORMULARIO, true)) {
     $erros[] = 'investimento';
 }
@@ -115,11 +127,13 @@ if ($erros) {
 }
 
 /* Perfil, pontuação e qualificação calculados aqui: não confiamos no navegador */
-$lead['perfil'] = in_array($lead['investimento'], CRM_INVESTIMENTO_COMPATIVEL, true) ? 'compativel' : 'abaixo_do_perfil';
 $lead['criado_em'] = $lead['atualizado_em'] = $lead['etapa_desde'] = crm_agora();
 $pontos = crm_pontuar($lead);
 $lead['pontuacao'] = $pontos['total'];
 $lead['classe'] = $pontos['classe'];
+$lead['perfil'] = $pontos['classe'] === 'A' ? 'compativel' : 'abaixo_do_perfil';
+/* Sócio ou dono já conta como "fala com quem decide" no checklist do SQL */
+$lead['qual_decisor'] = $lead['cargo'] === 'socio' ? 1 : 0;
 $lead['qualificacao'] = crm_calcular_qualificacao($lead);
 $lead['mql_em'] = $lead['qualificacao'] === 'mql' ? $lead['criado_em'] : null;
 
@@ -143,15 +157,20 @@ if (CRM_EMAIL_AVISO !== '') {
     $corpo = "Novo lead pela landing page:\n\n"
         . "Nome: {$lead['nome']}\nEmpresa: {$lead['empresa']}\nWhatsApp: {$lead['whatsapp']}\n"
         . "E-mail: {$lead['email']}\nSegmento: {$lead['segmento']}\n"
+        . 'Faturamento: ' . CRM_FATURAMENTO[$lead['faturamento']] . "\n"
         . 'Investimento: ' . CRM_INVESTIMENTO[$lead['investimento']] . "\n"
-        . 'Perfil: ' . ($lead['perfil'] === 'compativel' ? 'No perfil' : 'Abaixo do perfil') . "\n";
+        . 'Preço da assessoria: ' . CRM_ENCAIXE[$lead['encaixe']] . "\n"
+        . 'Classe: ' . $lead['classe'] . "\n";
     @mail(CRM_EMAIL_AVISO, '=?UTF-8?B?' . base64_encode('Novo lead: ' . $lead['nome']) . '?=', $corpo,
         "Content-Type: text/plain; charset=UTF-8\r\n");
 }
 
-/* Responde ao visitante e só depois conversa com a Meta (ele não espera) */
+/* Responde ao visitante e só depois conversa com a Meta (ele não espera).
+   "retorno" escolhe a mensagem de agradecimento: A tem prioridade, C não ganha
+   promessa de reunião. */
+$retorno = ['A' => 'prioridade', 'B' => 'padrao', 'C' => 'fora'][$lead['classe']];
 http_response_code(200);
-echo json_encode(['ok' => true]);
+echo json_encode(['ok' => true, 'retorno' => $retorno]);
 if (crm_liberar_resposta()) {
     ignore_user_abort(true);
     crm_processar_envios(3);

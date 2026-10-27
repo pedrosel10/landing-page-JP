@@ -21,12 +21,21 @@ O funil em kanban (`admin/index.php`) permite arrastar os cards; cada etapa tem 
 e o card ganha o alerta "parado há X dias" quando passa dele. Cada lead tem uma
 **próxima ação com data**; as atrasadas ficam em vermelho.
 
-**Pontuação do formulário (0 a 100) → classe:** verba mensal de anúncios (45),
-desafio (25), segmento (15), site ou rede social (10) e e-mail da empresa (5).
-A (quente) a partir de 70, B (morno) de 45 a 69, C (frio) abaixo de 45. Quem ainda não
-anuncia fica no máximo em B. Regras em `inc/funil.php`.
+**Pontuação do formulário (0 a 100) → classe:** faturamento (30), verba mensal de
+anúncios (25), resposta ao preço da assessoria (15), desafio (10), segmento (8),
+papel na empresa (7), site ou rede social (3) e e-mail da empresa (2).
+A classe segue regras de corte:
+- **C sempre:** fatura até R$ 50 mil, diz que a assessoria (a partir de R$ 4 mil) não
+  cabe no orçamento, ou investe até R$ 2.500 em anúncios e fatura menos de R$ 100 mil.
+- **A:** fatura R$ 100 mil+, investe R$ 2.500+ em anúncios e quer começar agora.
+- **O resto:** B com 45 pontos ou mais, C abaixo disso.
 
-**Lead → MQL → SQL:** vira MQL automaticamente quando o formulário é classe A ou B.
+Leads de antes de 27/10/2026 (sem faturamento) mantêm a regra anterior. Regras em
+`inc/funil.php`. A página mostra uma mensagem de agradecimento diferente para cada
+classe: A tem prioridade, C não recebe promessa de reunião.
+
+**Lead → MQL → SQL:** vira MQL automaticamente quando o formulário é classe A (leads
+antigos: A ou B). Quem se declara sócio ou dono já entra com "decisor" marcado.
 Vira SQL no atendimento, quando a lista confirma orçamento e decisor, mais 2 de 3:
 dor clara, quer começar em até 60 dias, operação comercial pronta.
 

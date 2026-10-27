@@ -215,7 +215,7 @@ crm_topo($lead['nome'], $usuario);
         <h2>Qualificação no atendimento</h2>
         <p class="qual-status"><?= crm_selo_qualificacao($lead['qualificacao']) ?>
           <?php if ($lead['qualificacao'] === 'sql'): ?> Pronto para venda<?= $lead['sql_em'] ? ' desde ' . h(crm_data($lead['sql_em'])) : '' ?>.
-          <?php elseif ($lead['qualificacao'] === 'mql'): ?> Bom perfil pelo formulário. Confirme os critérios na conversa para virar SQL.
+          <?php elseif ($lead['qualificacao'] === 'mql'): ?> Perfil ideal pelo formulário. Confirme os critérios na conversa para virar SQL.
           <?php else: ?> Formulário abaixo do perfil. Se a conversa confirmar os critérios, ele vira SQL.<?php endif; ?>
         </p>
         <form method="post" class="checklist">
@@ -240,7 +240,10 @@ crm_topo($lead['nome'], $usuario);
           <div><dt>Empresa</dt><dd><?= h($lead['empresa']) ?></dd></div>
           <div><dt>Site / Instagram</dt><dd><?php if ($linkSite): ?><a href="<?= h($linkSite) ?>" target="_blank" rel="noopener noreferrer nofollow"><?= h($site) ?></a><?php elseif ($site !== ''): ?><?= h($site) ?><?php else: ?><span class="muted">Não informado</span><?php endif; ?></dd></div>
           <div><dt>Segmento</dt><dd><?= h($lead['segmento']) ?></dd></div>
+          <?php if ($lead['faturamento'] !== ''): ?><div><dt>Faturamento</dt><dd><?= h(CRM_FATURAMENTO[$lead['faturamento']] ?? $lead['faturamento']) ?></dd></div><?php endif; ?>
           <div><dt>Verba de anúncios por mês</dt><dd><?= h(CRM_INVESTIMENTO[$lead['investimento']] ?? $lead['investimento']) ?></dd></div>
+          <?php if ($lead['cargo'] !== ''): ?><div><dt>Papel na empresa</dt><dd><?= h(CRM_CARGO[$lead['cargo']] ?? $lead['cargo']) ?></dd></div><?php endif; ?>
+          <?php if ($lead['encaixe'] !== ''): ?><div class="largo"><dt>Assessoria a partir de R$ 4 mil/mês</dt><dd><?= h(CRM_ENCAIXE[$lead['encaixe']] ?? $lead['encaixe']) ?></dd></div><?php endif; ?>
           <div class="largo"><dt>Principal desafio</dt><dd><?= h(CRM_DESAFIO[$lead['desafio']] ?? $lead['desafio']) ?></dd></div>
           <?php if ($lead['objetivo'] !== ''): ?><div class="largo"><dt>O que quer melhorar</dt><dd class="texto-livre"><?= nl2br(h($lead['objetivo'])) ?></dd></div><?php endif; ?>
         </dl>
@@ -267,7 +270,7 @@ crm_topo($lead['nome'], $usuario);
             <li><span><?= h($item[0]) ?></span><b><?= (int) $item[1] ?>/<?= (int) $item[2] ?></b></li>
           <?php endforeach; ?>
         </ul>
-        <p class="muted regra">A: 70+ · B: 45 a 69 · C: abaixo de 45. Quem ainda não anuncia fica no máximo em B.</p>
+        <p class="muted regra"><?= h($pontos['regra']) ?></p>
       </section>
 
       <section class="cartao">

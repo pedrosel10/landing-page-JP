@@ -67,14 +67,29 @@ const CRM_STATUS = [
     'perdido'     => 'Perdido',
 ];
 
+/* Faturamento mensal da empresa (formulário a partir de 27/10/2026) */
+const CRM_FATURAMENTO = [
+    'ate-50k'  => 'Até R$ 50 mil por mês',
+    '50-100k'  => 'R$ 50 a 100 mil por mês',
+    '100-200k' => 'R$ 100 a 200 mil por mês',
+    '200-500k' => 'R$ 200 a 500 mil por mês',
+    '500k-1mi' => 'R$ 500 mil a 1 milhão por mês',
+    '1-5mi'    => 'R$ 1 a 5 milhões por mês',
+    '5mi+'     => 'Mais de R$ 5 milhões por mês',
+];
+
 /* Verba mensal de anúncios (só campanhas, sem equipe ou assessoria).
-   As faixas antigas (investimento total em marketing) continuam aqui para
-   exibir os leads que chegaram antes da mudança no formulário. */
+   As faixas antigas continuam aqui para exibir os leads que chegaram
+   antes das mudanças no formulário. */
 const CRM_INVESTIMENTO = [
     'nao-investe' => 'Ainda não investe em anúncios',
-    'ate-5k'      => 'Menos de R$ 5 mil em anúncios',
+    'ate-2500'    => 'Até R$ 2.500 em anúncios',
+    '2500-5k'     => 'R$ 2.500 a 5 mil em anúncios',
     '5-10k'       => 'R$ 5 a 10 mil em anúncios',
     '10-20k'      => 'R$ 10 a 20 mil em anúncios',
+    '20-50k'      => 'R$ 20 a 50 mil em anúncios',
+    '50k+'        => 'Mais de R$ 50 mil em anúncios',
+    'ate-5k'      => 'Menos de R$ 5 mil em anúncios',
     '20-40k'      => 'R$ 20 a 40 mil em anúncios',
     '40-80k'      => 'R$ 40 a 80 mil em anúncios',
     '80-150k'     => 'R$ 80 a 150 mil em anúncios',
@@ -87,10 +102,21 @@ const CRM_INVESTIMENTO = [
     '3-5k'        => 'R$ 3.000 – 5.000 (marketing, formulário antigo)',
     '5k+'         => 'Acima de R$ 5.000 (marketing, formulário antigo)',
 ];
-const CRM_INVESTIMENTO_FORMULARIO = ['nao-investe', 'ate-5k', '5-10k', '10-20k', '20-40k', '40-80k', '80-150k', '150-300k', '300-500k', '500k+'];
+const CRM_INVESTIMENTO_FORMULARIO = ['nao-investe', 'ate-2500', '2500-5k', '5-10k', '10-20k', '20-50k', '50k+'];
 
-/* "No perfil" = já anuncia (ou, nos leads antigos, R$ 2 mil+ em marketing) */
-const CRM_INVESTIMENTO_COMPATIVEL = ['ate-5k', '5-10k', '10-20k', '20-40k', '40-80k', '80-150k', '150-300k', '300-500k', '500k+', '2-3k', '3-5k', '5k+'];
+const CRM_CARGO = [
+    'socio'     => 'Sócio ou dono',
+    'diretor'   => 'Diretor ou gerente',
+    'marketing' => 'Marketing',
+    'outro'     => 'Outro',
+];
+
+/* Resposta à pergunta "a assessoria parte de R$ 4 mil por mês, faz sentido?" */
+const CRM_ENCAIXE = [
+    'agora'    => 'Faz sentido, quer começar agora',
+    'depois'   => 'Faz sentido, mas daqui a alguns meses',
+    'nao-cabe' => 'Ainda não cabe no orçamento',
+];
 
 const CRM_DESAFIO = [
     'poucos-leads'             => 'Não consigo gerar clientes ou leads suficientes',
@@ -372,6 +398,21 @@ function crm_migrar(PDO $db): void
         $db->exec('PRAGMA user_version = 4');
         $versao = 4;
         $repontuarTodos = true;
+    }
+
+    /* v5: faturamento, papel na empresa e encaixe no preço da assessoria.
+       Só acrescenta colunas; os leads antigos mantêm a pontuação que tinham. */
+    if ($versao < 5) {
+        $db->exec('BEGIN');
+        $existentes = array_column($db->query('PRAGMA table_info(leads)')->fetchAll(), 'name');
+        foreach (['faturamento', 'cargo', 'encaixe'] as $coluna) {
+            if (!in_array($coluna, $existentes, true)) {
+                $db->exec("ALTER TABLE leads ADD COLUMN $coluna TEXT NOT NULL DEFAULT ''");
+            }
+        }
+        $db->exec('PRAGMA user_version = 5');
+        $db->exec('COMMIT');
+        $versao = 5;
     }
 
     /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */

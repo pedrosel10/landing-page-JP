@@ -91,7 +91,7 @@ crm_topo('Lista de leads', $usuario);
           <span class="nv-quando"><?= h(crm_tempo_relativo($n['criado_em'])) ?></span>
           <b><?= h($n['nome']) ?></b>
           <small><?= h($n['empresa']) ?></small>
-          <span class="nv-info"><?= h($n['segmento']) ?> · <?= h(CRM_INVESTIMENTO[$n['investimento']] ?? $n['investimento']) ?></span>
+          <span class="nv-info"><?= h(crm_resumo_perfil($n)) ?></span>
           <span class="nv-rodape"><?= crm_selo_classe($n['classe']) ?><span class="nv-abrir">Abrir →</span></span>
         </a>
       <?php endforeach; ?>

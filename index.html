@@ -609,6 +609,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:420px){.fsteps .t{display:none}.fsteps .on .t{display:inline}}
 .fprog{height:3px;margin-bottom:28px;border-radius:2px;background:var(--cream-2);overflow:hidden}
 .fprog i{display:block;width:50%;height:100%;background:var(--wine);transition:width .35s ease}
+.fsteps[hidden],.fprog[hidden]{display:none}
 .fstep{display:grid;gap:22px}
 .fstep[hidden]{display:none}
 .fstep-h{font-size:1.45rem;font-weight:400;letter-spacing:-.03em;line-height:1.15}
@@ -1489,9 +1490,9 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <div class="fit-card fit-yes">
         <h3>Essa assessoria é para você se...</h3>
         <ul>
-          <li>Sua empresa já possui uma operação comercial funcionando.</li>
+          <li>Sua empresa fatura a partir de R$ 100 mil por mês e tem uma operação comercial funcionando.</li>
           <li>Você quer aumentar a aquisição de clientes.</li>
-          <li>Está disposto a investir de forma consistente em marketing.</li>
+          <li>Pode investir pelo menos R$ 2.500 a R$ 3 mil por mês em anúncios, além da assessoria.</li>
           <li>Entende que crescimento exige estratégia e testes.</li>
           <li>Quer profissionais cuidando da operação de marketing.</li>
         </ul>
@@ -1502,7 +1503,8 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
           <li>Você procura apenas “alguém para fazer alguns anúncios”.</li>
           <li>Seu objetivo é encontrar o serviço mais barato.</li>
           <li>Sua empresa ainda não possui uma operação minimamente estruturada.</li>
-          <li>Você não pretende investir de forma consistente em aquisição.</li>
+          <li>Ainda não tem verba para anunciar todo mês.</li>
+          <li>A margem do negócio é apertada demais para investir em aquisição.</li>
         </ul>
       </div>
     </div>
@@ -1519,7 +1521,7 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <h2 class="h2">Conte-nos sobre <span class="mute">sua empresa.</span></h2>
       <p class="lead">Leva menos de 1 minuto. Analisamos cada empresa antes da conversa, para que a reunião já comece pelo que importa: o seu crescimento.</p>
       <ol class="next">
-        <li><span>01</span><div><b>Você preenche o formulário</b><small>Segmento, verba de anúncios e principal desafio.</small></div></li>
+        <li><span>01</span><div><b>Você preenche o formulário</b><small>Faturamento, verba de anúncios e principal desafio.</small></div></li>
         <li><span>02</span><div><b>Analisamos o perfil da sua empresa</b><small>Em até 1 dia útil.</small></div></li>
         <li><span>03</span><div><b>Agendamos a reunião estratégica</b><small>Contato pelo WhatsApp com um especialista.</small></div></li>
       </ol>
@@ -1536,7 +1538,34 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <form id="lead-form" novalidate>
         <!-- Etapa 1: qualificação (respostas rápidas, em listas) -->
         <div class="fstep" data-step="1">
-          <p class="fstep-h">Sobre a sua empresa<small>Três respostas rápidas para prepararmos a conversa.</small></p>
+          <p class="fstep-h">Sobre a sua empresa<small>Quatro respostas rápidas para prepararmos a conversa.</small></p>
+          <div class="field">
+            <label for="f-fat">Quanto sua empresa fatura por mês?</label>
+            <select class="input" id="f-fat" name="faturamento" required>
+              <option value="" disabled selected>Selecione...</option>
+              <option value="ate-50k">Até R$ 50 mil</option>
+              <option value="50-100k">De R$ 50 mil a R$ 100 mil</option>
+              <option value="100-200k">De R$ 100 mil a R$ 200 mil</option>
+              <option value="200-500k">De R$ 200 mil a R$ 500 mil</option>
+              <option value="500k-1mi">De R$ 500 mil a R$ 1 milhão</option>
+              <option value="1-5mi">De R$ 1 milhão a R$ 5 milhões</option>
+              <option value="5mi+">Mais de R$ 5 milhões</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-inv">Quanto você investe hoje por mês em anúncios?</label>
+            <select class="input" id="f-inv" name="investimento" required aria-describedby="f-inv-dica">
+              <option value="" disabled selected>Selecione...</option>
+              <option value="nao-investe">Ainda não invisto em anúncios</option>
+              <option value="ate-2500">Até R$ 2.500</option>
+              <option value="2500-5k">De R$ 2.500 a R$ 5 mil</option>
+              <option value="5-10k">De R$ 5 mil a R$ 10 mil</option>
+              <option value="10-20k">De R$ 10 mil a R$ 20 mil</option>
+              <option value="20-50k">De R$ 20 mil a R$ 50 mil</option>
+              <option value="50k+">Mais de R$ 50 mil</option>
+            </select>
+            <small class="field-dica" id="f-inv-dica">Só a verba que vai para as campanhas (Meta, Google etc.), sem contar equipe, agência ou assessoria.</small>
+          </div>
           <div class="field">
             <label for="f-seg">Segmento</label>
             <select class="input" id="f-seg" name="segmento" required>
@@ -1552,23 +1581,6 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
               <option>Educação</option>
               <option>Outro</option>
             </select>
-          </div>
-          <div class="field">
-            <label for="f-inv">Quanto você investe (ou pretende investir) por mês em anúncios?</label>
-            <select class="input" id="f-inv" name="investimento" required aria-describedby="f-inv-dica">
-              <option value="" disabled selected>Selecione...</option>
-              <option value="nao-investe">Ainda não invisto em anúncios</option>
-              <option value="ate-5k">Menos de R$ 5 mil</option>
-              <option value="5-10k">De R$ 5.001 até R$ 10 mil</option>
-              <option value="10-20k">De R$ 10.001 até R$ 20 mil</option>
-              <option value="20-40k">De R$ 20.001 até R$ 40 mil</option>
-              <option value="40-80k">De R$ 40.001 até R$ 80 mil</option>
-              <option value="80-150k">De R$ 80.001 até R$ 150 mil</option>
-              <option value="150-300k">De R$ 150.001 até R$ 300 mil</option>
-              <option value="300-500k">De R$ 300.001 até R$ 500 mil</option>
-              <option value="500k+">Mais de R$ 500 mil</option>
-            </select>
-            <small class="field-dica" id="f-inv-dica">Só a verba que vai para as campanhas (Meta, Google etc.), sem contar equipe, agência ou assessoria.</small>
           </div>
           <div class="field">
             <label for="f-desafio">Principal desafio hoje</label>
@@ -1600,6 +1612,24 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
             <div class="field"><label for="f-empresa">Empresa</label><input class="input" id="f-empresa" name="empresa" type="text" autocomplete="organization" placeholder="Nome da empresa" required></div>
             <div class="field"><label for="f-site">Site ou Instagram <span class="opt-hint">(opcional)</span></label><input class="input" id="f-site" name="site_instagram" type="text" placeholder="@suaempresa ou site"></div>
           </div>
+          <div class="field">
+            <label for="f-cargo">Seu papel na empresa</label>
+            <select class="input" id="f-cargo" name="cargo" required>
+              <option value="" disabled selected>Selecione...</option>
+              <option value="socio">Sócio(a) ou dono(a)</option>
+              <option value="diretor">Diretor(a) ou gerente</option>
+              <option value="marketing">Marketing</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <fieldset class="field">
+            <legend>Nossa assessoria parte de R$ 4 mil por mês, além da verba de anúncios. Faz sentido para o momento da sua empresa?</legend>
+            <div class="opts">
+              <label class="opt"><input type="radio" name="encaixe" value="agora" required><span>Sim, quero começar agora</span></label>
+              <label class="opt"><input type="radio" name="encaixe" value="depois"><span>Sim, mas daqui a alguns meses</span></label>
+              <label class="opt"><input type="radio" name="encaixe" value="nao-cabe"><span>Ainda não cabe no orçamento</span></label>
+            </div>
+          </fieldset>
           <label class="consent"><input type="checkbox" name="consentimento" value="sim" required><span>Concordo em receber contato da equipe e com a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>
           <div class="f-error" role="alert">Não foi possível enviar agora. Tente novamente em instantes.</div>
           <div class="f-actions"><button type="button" class="btn-back" data-back>Voltar</button><button type="submit" class="btn btn-primary" data-submit>Quero falar com um especialista <span class="arr">→</span></button></div>
@@ -1614,7 +1644,9 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <div class="success" role="status" aria-live="polite">
         <span class="ok"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11.5l4 4 8-9"/></svg></span>
         <h3>Recebemos suas informações<span data-name></span>.</h3>
-        <p>Nossa equipe vai analisar o perfil da sua empresa e entrar em contato pelo WhatsApp em até 1 dia útil para agendar a conversa.</p>
+        <p data-retorno="prioridade" hidden>Sua empresa tem o perfil que atendemos. Um especialista vai te chamar no WhatsApp ainda hoje, em horário comercial, para agendar a reunião estratégica.</p>
+        <p data-retorno="padrao">Nossa equipe vai analisar o perfil da sua empresa e entrar em contato pelo WhatsApp em até 1 dia útil para agendar a conversa.</p>
+        <p data-retorno="fora" hidden>Obrigado pelo interesse. Pelo que você contou, nossa assessoria ainda não é o melhor passo para o momento da sua empresa: ela faz mais sentido para negócios que faturam a partir de R$ 100 mil por mês e investem pelo menos R$ 2.500 em anúncios. Seus dados ficam guardados com a gente e, quando fizer sentido, voltamos a conversar.</p>
       </div>
     </div>
   </div>
@@ -1635,10 +1667,11 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
       <details class="qa"><summary><span class="qa-n">02 /</span>Meus resultados estão razoáveis.</summary><p>Razoável costuma esconder dinheiro na mesa: custo por lead que poderia ser menor, leads que não viram venda, campanhas sem rastreamento. Olhamos os números com você e mostramos o que dá para melhorar antes de qualquer proposta.</p></details>
       <details class="qa"><summary><span class="qa-n">03 /</span>Como eu sei que preciso de vocês?</summary><p>Se você não sabe com clareza quanto custa cada cliente que vem dos anúncios, ou se os leads chegam mas as vendas não acompanham, vale a conversa. Se isso já está resolvido na sua empresa, a gente mesmo vai te dizer.</p></details>
       <details class="qa"><summary><span class="qa-n">04 /</span>Já contratei agência e não mudou nada.</summary><p>É justamente por isso que não começamos criando campanhas. Primeiro entendemos negócio, oferta, público e processo comercial. Tráfego sem esse sistema por trás só aumenta o gasto.</p></details>
-      <details class="qa"><summary><span class="qa-n">05 /</span>Isso funciona pro meu segmento?</summary><p>Já atendemos clínicas, educação, imobiliárias, indústria, e-commerce, transporte e empresas de serviços. A estratégia é montada para o seu modelo, público e ticket. Mais do que o tamanho da empresa, importa ter operação comercial funcionando e verba para anunciar com consistência.</p></details>
-      <details class="qa"><summary><span class="qa-n">06 /</span>Por onde o trabalho começa?</summary><p>Por um diagnóstico: entendemos sua operação, seus números e onde estão as maiores oportunidades. Depois montamos o plano com estratégia, campanhas, criativos, páginas e acompanhamento.</p></details>
-      <details class="qa"><summary><span class="qa-n">07 /</span>Vocês assumem a operação ou trabalham com o meu time?</summary><p>Assumimos o marketing de ponta a ponta: estratégia, tráfego, copy, roteiros, criativos e landing pages. Se você já tem alguém interno, como designer ou time comercial, trabalhamos junto, com papéis bem definidos.</p></details>
-      <details class="qa"><summary><span class="qa-n">08 /</span>Como acompanho os resultados?</summary><p>Com relatório semanal e dashboard mostrando o que importa: investimento, leads, custo por lead e vendas. Você sabe para onde cada real está indo.</p></details>
+      <details class="qa"><summary><span class="qa-n">05 /</span>Isso funciona pro meu segmento?</summary><p>Já atendemos clínicas, educação, imobiliárias, indústria, e-commerce, transporte e empresas de serviços. A estratégia é montada para o seu modelo, público e ticket. Mais do que o segmento, importa ter operação comercial funcionando e verba para anunciar com consistência.</p></details>
+      <details class="qa"><summary><span class="qa-n">06 /</span>Quanto custa a assessoria?</summary><p>A assessoria parte de R$ 4 mil por mês. O valor final depende do escopo: canais, volume de criativos e páginas. A verba de anúncios é separada e vai direto para as plataformas; recomendamos pelo menos R$ 2.500 a R$ 3 mil por mês para as campanhas terem dados suficientes para otimizar. Por isso o trabalho rende mais em empresas que faturam a partir de R$ 100 mil por mês.</p></details>
+      <details class="qa"><summary><span class="qa-n">07 /</span>Por onde o trabalho começa?</summary><p>Por um diagnóstico: entendemos sua operação, seus números e onde estão as maiores oportunidades. Depois montamos o plano com estratégia, campanhas, criativos, páginas e acompanhamento.</p></details>
+      <details class="qa"><summary><span class="qa-n">08 /</span>Vocês assumem a operação ou trabalham com o meu time?</summary><p>Assumimos o marketing de ponta a ponta: estratégia, tráfego, copy, roteiros, criativos e landing pages. Se você já tem alguém interno, como designer ou time comercial, trabalhamos junto, com papéis bem definidos.</p></details>
+      <details class="qa"><summary><span class="qa-n">09 /</span>Como acompanho os resultados?</summary><p>Com relatório semanal e dashboard mostrando o que importa: investimento, leads, custo por lead e vendas. Você sabe para onde cada real está indo.</p></details>
     </div>
   </div>
 </section>
@@ -1719,7 +1752,6 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
    FORM_ENDPOINT: recebe o lead via POST (JSON) e grava no CRM (/jp/admin).
    ========================================================================== */
 const FORM_ENDPOINT = 'api/lead.php';
-const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
 
 (function () {
   const $ = (s, c = document) => c.querySelector(s);
@@ -1955,7 +1987,6 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
 
     const data = Object.fromEntries(new FormData(form));
     delete data.website;
-    data.lead_fit = PERFIL_COMPATIVEL.includes(data.investimento) ? 'compativel' : 'abaixo_do_perfil';
     data.variante_headline = variant;
     data.pagina = location.href.split('#')[0];
     data.enviado_em = new Date().toISOString();
@@ -1967,6 +1998,7 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
     err.classList.remove('show');
 
     try {
+      let retorno = 'padrao';
       if (FORM_ENDPOINT) {
         const res = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const resposta = await res.json().catch(() => ({}));
@@ -1975,16 +2007,20 @@ const PERFIL_COMPATIVEL = ['2-3k', '3-5k', '5k+'];
           erro.limite = res.status === 429;
           throw erro;
         }
+        if (['prioridade', 'padrao', 'fora'].includes(resposta.retorno)) retorno = resposta.retorno;
       } else {
         console.info('[LP] Modo de teste: configure FORM_ENDPOINT. Lead:', data);
       }
-      track('lead_submit', { lead_fit: data.lead_fit, segmento: data.segmento, investimento: data.investimento, variant });
+      $$('[data-retorno]').forEach(p => { p.hidden = p.dataset.retorno !== retorno; });
+      track('lead_submit', { lead_fit: retorno, segmento: data.segmento, faturamento: data.faturamento, investimento: data.investimento, variant });
       const firstName = (data.nome || '').trim().split(' ')[0];
       $('[data-name]').textContent = firstName ? `, ${firstName}` : '';
       form.hidden = true;
       $('.fsteps').hidden = true;
       $('.fprog').hidden = true;
       $('.success').classList.add('show');
+      // a etapa 2 é longa: sem isso, o formulário encolhe e a confirmação fica acima da tela
+      if (card.getBoundingClientRect().top < 0) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (ex) {
       err.textContent = ex.limite
         ? 'Recebemos vários envios seguidos deste aparelho. Aguarde alguns minutos e tente de novo.'

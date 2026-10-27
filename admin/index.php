@@ -166,7 +166,7 @@ crm_topo('Funil', $usuario, 'pagina-funil');
               </span>
               <b class="card-nome"><?= h($l['nome']) ?></b>
               <small class="card-empresa"><?= h($l['empresa']) ?></small>
-              <span class="card-info"><?= h($l['segmento']) ?> · <?= h(CRM_INVESTIMENTO[$l['investimento']] ?? '') ?></span>
+              <span class="card-info"><?= h(crm_resumo_perfil($l)) ?></span>
               <?php if ($etapa === 'novo'): ?>
                 <span class="card-tempo">Chegou <?= h(crm_tempo_relativo($l['criado_em'])) ?></span>
               <?php elseif ($etapa === 'ganho'): ?>

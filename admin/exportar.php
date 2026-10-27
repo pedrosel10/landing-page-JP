@@ -7,7 +7,8 @@ crm_exigir_login();
 $colunas = [
     'id' => 'ID', 'criado_em' => 'Recebido em', 'nome' => 'Nome', 'empresa' => 'Empresa',
     'whatsapp' => 'WhatsApp', 'email' => 'E-mail', 'site_instagram' => 'Site/Instagram',
-    'segmento' => 'Segmento', 'investimento' => 'Investimento', 'perfil' => 'Perfil',
+    'segmento' => 'Segmento', 'faturamento' => 'Faturamento', 'investimento' => 'Verba de anúncios',
+    'cargo' => 'Papel na empresa', 'encaixe' => 'Assessoria a partir de R$ 4 mil', 'perfil' => 'Perfil',
     'desafio' => 'Desafio', 'objetivo' => 'O que quer melhorar', 'status' => 'Etapa',
     'pontuacao' => 'Pontuação', 'classe' => 'Classe', 'qualificacao' => 'Qualificação',
     'proxima_acao' => 'Próxima ação', 'proxima_acao_em' => 'Próxima ação em', 'valor_mensal' => 'Valor mensal (R$)',
@@ -32,7 +33,10 @@ fputcsv($saida, array_values($colunas), ';', '"', '\\');
 
 $st = crm_db()->query('SELECT ' . implode(', ', array_keys($colunas)) . ' FROM leads ORDER BY criado_em DESC, id DESC');
 while ($l = $st->fetch()) {
+    $l['faturamento'] = CRM_FATURAMENTO[$l['faturamento']] ?? $l['faturamento'];
     $l['investimento'] = CRM_INVESTIMENTO[$l['investimento']] ?? $l['investimento'];
+    $l['cargo'] = CRM_CARGO[$l['cargo']] ?? $l['cargo'];
+    $l['encaixe'] = CRM_ENCAIXE[$l['encaixe']] ?? $l['encaixe'];
     $l['desafio'] = CRM_DESAFIO[$l['desafio']] ?? $l['desafio'];
     $l['status'] = CRM_STATUS[$l['status']] ?? $l['status'];
     $l['perfil'] = $l['perfil'] === 'compativel' ? 'No perfil' : 'Abaixo do perfil';
