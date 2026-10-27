@@ -704,6 +704,14 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 .mcta.show{transform:none}
 @media (min-width:768px){.mcta{display:none}}
 </style>
+<!-- Microsoft Clarity (mapas de calor e gravações de sessão). Só nesta página, nunca no CRM. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "z4g1pp06tm");
+</script>
 </head>
 <body>
 
@@ -1768,7 +1776,10 @@ const FORM_ENDPOINT = 'api/lead.php';
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   window.dataLayer = window.dataLayer || [];
-  const track = (event, data = {}) => window.dataLayer.push({ event, ...data });
+  const track = (event, data = {}) => {
+    window.dataLayer.push({ event, ...data });
+    if (window.clarity) window.clarity('event', event); // filtra gravações no Clarity (ex.: lead_submit)
+  };
 
   /* Header com fundo ao rolar */
   const topbar = $('.topbar');
@@ -2023,6 +2034,7 @@ const FORM_ENDPOINT = 'api/lead.php';
         console.info('[LP] Modo de teste: configure FORM_ENDPOINT. Lead:', data);
       }
       $$('[data-retorno]').forEach(p => { p.hidden = p.dataset.retorno !== retorno; });
+      if (window.clarity) window.clarity('set', 'perfil_lead', retorno); // prioridade, padrao ou fora
       track('lead_submit', { lead_fit: retorno, segmento: data.segmento, faturamento: data.faturamento, investimento: data.investimento, variant });
       const firstName = (data.nome || '').trim().split(' ')[0];
       $('[data-name]').textContent = firstName ? `, ${firstName}` : '';
