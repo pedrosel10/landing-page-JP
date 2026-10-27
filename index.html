@@ -704,6 +704,21 @@ select.input{appearance:none;-webkit-appearance:none;padding-right:40px;backgrou
 .mcta.show{transform:none}
 @media (min-width:768px){.mcta{display:none}}
 </style>
+<!-- Meta Pixel (navegador). O Lead também vai pelo servidor (CRM) com o mesmo
+     eventID, e a Meta conta uma vez só. -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1440278698213495');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1440278698213495&amp;ev=PageView&amp;noscript=1"></noscript>
 <!-- Microsoft Clarity (mapas de calor e gravações de sessão). Só nesta página, nunca no CRM. -->
 <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -2010,6 +2025,11 @@ const FORM_ENDPOINT = 'api/lead.php';
     const data = Object.fromEntries(new FormData(form));
     delete data.website;
     data.variante_headline = variant;
+    // o Pixel cria o cookie _fbp depois que a página carrega: lê de novo na hora do envio
+    if (!data.fbp) data.fbp = decodeURIComponent((document.cookie.match('(?:^|; )_fbp=([^;]*)') || [])[1] || '');
+    if (!data.fbc) data.fbc = decodeURIComponent((document.cookie.match('(?:^|; )_fbc=([^;]*)') || [])[1] || '');
+    // mesmo ID no Pixel e no servidor: a Meta conta o Lead uma vez só
+    data.evento_id = 'lead-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
     data.pagina = location.href.split('#')[0];
     data.enviado_em = new Date().toISOString();
 
@@ -2035,6 +2055,7 @@ const FORM_ENDPOINT = 'api/lead.php';
       }
       $$('[data-retorno]').forEach(p => { p.hidden = p.dataset.retorno !== retorno; });
       if (window.clarity) window.clarity('set', 'perfil_lead', retorno); // prioridade, padrao ou fora
+      if (window.fbq && FORM_ENDPOINT) window.fbq('track', 'Lead', {}, { eventID: data.evento_id });
       track('lead_submit', { lead_fit: retorno, segmento: data.segmento, faturamento: data.faturamento, investimento: data.investimento, variant });
       const firstName = (data.nome || '').trim().split(' ')[0];
       $('[data-name]').textContent = firstName ? `, ${firstName}` : '';

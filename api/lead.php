@@ -146,7 +146,9 @@ try {
     $sql = 'INSERT INTO leads (' . implode(', ', $colunas) . ') VALUES (' . implode(', ', array_fill(0, count($colunas), '?')) . ')';
     crm_db()->prepare($sql)->execute(array_values($lead));
     $novoId = (int) crm_db()->lastInsertId();
-    crm_enfileirar($novoId, 'lead');
+    /* ID que o Pixel do navegador usa no mesmo Lead: a Meta junta os dois em um só */
+    $eventoPixel = crm_texto($dados['evento_id'] ?? '', 64);
+    crm_enfileirar($novoId, 'lead', preg_match('/^lead-[a-z0-9-]{16,58}$/', $eventoPixel) ? $eventoPixel : '');
     if ($lead['qualificacao'] === 'mql') {
         crm_enfileirar($novoId, 'mql');
     }

@@ -65,14 +65,16 @@ function crm_meta_pronta(): bool
 /* ---------------------------------------------------------------- fila */
 
 /* Coloca o evento na fila da Meta (uma vez por lead e evento) */
-function crm_enfileirar(int $leadId, string $evento): void
+/* $eventId: o mesmo ID que o Pixel do navegador usou, para a Meta contar o evento
+   uma vez só (deduplicação). Sem ele, o ID é "jpcrm-<lead>-<evento>". */
+function crm_enfileirar(int $leadId, string $evento, string $eventId = ''): void
 {
     if (!isset(CRM_EVENTOS[$evento]) || !crm_meta_pronta() || crm_config('meta_ev_' . $evento, '1') !== '1') {
         return;
     }
     crm_db()->prepare("INSERT OR IGNORE INTO envios (lead_id, plataforma, evento, event_id, status, tentativas, resposta, criado_em)
         VALUES (?, 'meta', ?, ?, 'pendente', 0, '', ?)")
-        ->execute([$leadId, $evento, 'jpcrm-' . $leadId . '-' . $evento, crm_agora()]);
+        ->execute([$leadId, $evento, $eventId !== '' ? $eventId : 'jpcrm-' . $leadId . '-' . $evento, crm_agora()]);
 }
 
 /* Envia o que estiver pendente (e tenta de novo os erros, até 5 vezes, a cada 15 min) */
