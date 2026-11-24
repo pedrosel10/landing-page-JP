@@ -20,6 +20,9 @@ deployment:
     - /bin/cp marca/*.svg ${DEPLOYPATH}marca/
     - /bin/cp -R marcas $DEPLOYPATH
     - /bin/cp -R prints $DEPLOYPATH
+    # Proposta do cliente (/jp/proposta/?t=CÓDIGO): só o index.php; o conteúdo vem do CRM
+    - /bin/mkdir -p ${DEPLOYPATH}proposta
+    - /bin/cp proposta/index.php ${DEPLOYPATH}proposta/
     # CRM: código apenas (inc/ inclui o .htaccess que bloqueia acesso direto)
     - /bin/cp -R inc $DEPLOYPATH
     - /bin/cp -R api $DEPLOYPATH

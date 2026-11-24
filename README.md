@@ -47,6 +47,30 @@ da época.
   protegido por chave) com GCLID, nome da conversão, data e valor. Sem dados pessoais.
 - A landing page guarda fbclid, gclid e UTMs por 90 dias no navegador do visitante.
 
+## Proposta do cliente (`/jp/proposta/?t=CÓDIGO`)
+
+Página de proposta com rolagem (fluxos animados, setas à mão, modo apresentação com ↑ ↓),
+gerada **por lead** a partir da ficha no CRM (bloco "Proposta").
+
+- **Gerar:** na ficha, preencha as observações ("o que vimos antes da conversa"), a frase
+  "Você comentou que…", o case em destaque, os valores e o prazo. O resto vem do formulário.
+  Gerar já move o lead para "Proposta enviada" (dá para desmarcar).
+- **Enviar:** "Copiar link" ou "Enviar pelo WhatsApp" (mensagem pronta para o lead).
+- **Apresentar na reunião:** use "Abrir para apresentar" (`&previa=1`): mostra a mesma
+  página, mas **não conta** como leitura do cliente.
+- **Leitura:** a ficha mostra quantas vezes o cliente abriu, quando, por quanto tempo e até
+  que seção leu. A primeira abertura entra no histórico do lead.
+- **Link:** o código é aleatório (128 bits). "Gerar link novo" invalida o antigo;
+  "Desativar link" faz a página responder "proposta não encontrada".
+- **Prévia do modelo:** `admin/proposta-exemplo.php` (só logado) mostra a página com um
+  cliente de exemplo.
+
+Arquivos: `proposta/index.php` (página pública), `inc/proposta-modelo.php` (HTML da página),
+`inc/proposta.php` (regras), `api/proposta.php` (rastreio de leitura, via `sendBeacon`).
+Nenhum dado de cliente fica no repositório: a página puxa tudo do banco. O número de WhatsApp
+do botão "Quero começar" fica em `CRM_PROPOSTA_WHATSAPP` (`inc/config.php`); vazio, o botão
+abre um e-mail.
+
 ## Onde ficam os leads (e por que o deploy não apaga)
 
 O banco SQLite fica em `~/jp_crm_dados/` no servidor, **um nível acima do `public_html`**

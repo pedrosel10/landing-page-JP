@@ -35,3 +35,7 @@ const CRM_BACKUPS_MANTIDOS = 30;
 
 /* E-mail que recebe aviso a cada lead novo. Vazio = desligado. */
 const CRM_EMAIL_AVISO = '';
+
+/* WhatsApp comercial da J.P.Growth no botão "Quero começar" da proposta
+   (DDI + DDD + número, só dígitos, ex.: 5527999999999). Vazio = o botão abre um e-mail. */
+const CRM_PROPOSTA_WHATSAPP = '';

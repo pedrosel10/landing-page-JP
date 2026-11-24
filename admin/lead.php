@@ -69,6 +69,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $db->prepare('UPDATE leads SET atualizado_em = ? WHERE id = ?')->execute([crm_agora(), $id]);
             crm_aviso('Anotação salva.');
         }
+    } elseif ($acao === 'proposta_salvar') {
+        $nova = crm_proposta_do_lead($id) === null;
+        crm_proposta_salvar($id, crm_proposta_campos($_POST), $usuario['usuario']);
+        if ($nova && !empty($_POST['mover']) && in_array($lead['status'], ['novo', 'atendimento', 'agendada', 'realizada'], true)) {
+            crm_mudar_etapa($id, 'proposta', $usuario['usuario']);
+        }
+        $db->prepare('UPDATE leads SET atualizado_em = ? WHERE id = ?')->execute([crm_agora(), $id]);
+        crm_aviso($nova ? 'Proposta gerada. Copie o link ou envie pelo WhatsApp.' : 'Proposta atualizada. O link continua o mesmo.');
+        $volta .= '#proposta';
+    } elseif ($acao === 'proposta_link') {
+        if (crm_proposta_do_lead($id)) {
+            crm_proposta_novo_link($id, $usuario['usuario']);
+            crm_aviso('Link novo gerado. O link antigo não abre mais.');
+        }
+        $volta .= '#proposta';
+    } elseif ($acao === 'proposta_ativa') {
+        if (crm_proposta_do_lead($id)) {
+            $ativa = ($_POST['ativa'] ?? '') === '1';
+            crm_proposta_ativar($id, $ativa, $usuario['usuario']);
+            crm_aviso($ativa ? 'Link da proposta reativado.' : 'Link da proposta desativado.');
+        }
+        $volta .= '#proposta';
     } elseif ($acao === 'nao_visto') {
         $db->prepare('UPDATE leads SET visto_em = NULL WHERE id = ?')->execute([$id]);
         /* Neste navegador ele não é remarcado sozinho: fica esperando o sócio ver */
@@ -123,6 +145,13 @@ if (preg_match('~^@?([A-Za-z0-9._]{1,30})$~', $site, $m) && strpos($site, '.') =
 }
 $ordem = array_flip(CRM_ETAPAS_ABERTAS);
 $posAtual = $ordem[$lead['status']] ?? 99;
+
+/* Proposta: a salva ou, se ainda não existe, a sugestão pelo formulário */
+$proposta = crm_proposta_do_lead($id);
+$pv = $proposta ?: crm_proposta_sugestao($lead);
+$propUrl = $proposta ? crm_proposta_url($proposta['token']) : '';
+$propMsg = $proposta ? "Olá, {$primeiroNome}! Como combinamos, aqui está a proposta da J.P.Growth para a {$lead['empresa']}: {$propUrl}" : '';
+$secoesProposta = count(CRM_PROPOSTA_SECOES);
 
 crm_topo($lead['nome'], $usuario);
 ?>
@@ -274,6 +303,87 @@ crm_topo($lead['nome'], $usuario);
     </div>
 
     <div class="ficha-col">
+      <section class="cartao proposta-cartao" id="proposta">
+        <h2>Proposta</h2>
+        <?php if ($proposta): ?>
+          <?php if ((int) $proposta['ativa'] === 1): ?>
+            <div class="prop-link">
+              <code><?= h($propUrl) ?></code>
+              <button type="button" class="btn btn-claro" data-copiar="<?= h($propUrl) ?>">Copiar link</button>
+            </div>
+            <div class="prop-acoes">
+              <a class="btn btn-primario" href="<?= h(crm_link_whatsapp($lead['whatsapp'], $propMsg)) ?>" target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
+              <a class="btn btn-claro" href="<?= h(crm_proposta_url($proposta['token'], true)) ?>" target="_blank" rel="noopener noreferrer">Abrir para apresentar</a>
+            </div>
+          <?php else: ?>
+            <p class="prop-off">Link desativado: quem abrir vê "proposta não encontrada".</p>
+          <?php endif; ?>
+          <?php if ((int) $proposta['visitas'] > 0): ?>
+            <dl class="mini-dados prop-leitura">
+              <div><dt>Aberturas</dt><dd><?= (int) $proposta['visitas'] ?></dd></div>
+              <div><dt>Última vez</dt><dd><?= h(crm_tempo_relativo((string) $proposta['ultima_visita'])) ?></dd></div>
+              <div><dt>Tempo na página</dt><dd><?= h(crm_proposta_tempo((int) $proposta['tempo_total'])) ?></dd></div>
+              <div><dt>Até onde leu</dt><dd><?= h(crm_proposta_leitura($proposta)) ?></dd></div>
+            </dl>
+            <progress class="prop-progresso" max="<?= $secoesProposta ?>" value="<?= (int) $proposta['secao_max'] + 1 ?>"><?= h(crm_proposta_leitura($proposta)) ?></progress>
+          <?php else: ?>
+            <p class="prop-nao-abriu">O cliente ainda não abriu a proposta. Aberturas pelo "Abrir para apresentar" não contam.</p>
+          <?php endif; ?>
+        <?php else: ?>
+          <p class="prop-intro">Gere a página de proposta deste lead. Ela usa os dados do formulário e o que vocês escreverem abaixo, e o cliente recebe um link só dele.</p>
+        <?php endif; ?>
+
+        <details class="prop-editar"<?= $proposta ? '' : ' open' ?>>
+          <summary><?= $proposta ? 'Editar o conteúdo da proposta' : 'Montar a proposta' ?></summary>
+          <form method="post" class="form prop-form">
+            <?= crm_csrf_campo() ?>
+            <input type="hidden" name="acao" value="proposta_salvar"><input type="hidden" name="id" value="<?= (int) $id ?>">
+            <div class="obs">
+              <label for="obs1">O que vimos antes da conversa <span class="dica">até 3 observações, aparecem como bilhetes</span></label>
+              <input id="obs1" name="obs1" maxlength="220" value="<?= h($pv['obs1']) ?>" placeholder="Ex.: os anúncios falam de preço, não do motivo para escolher vocês">
+              <input name="obs2" maxlength="220" value="<?= h($pv['obs2']) ?>" placeholder="Ex.: o link da bio leva direto para o WhatsApp, sem página" aria-label="Observação 2">
+              <input name="obs3" maxlength="220" value="<?= h($pv['obs3']) ?>" placeholder="Ex.: não achamos o Pixel da Meta no site" aria-label="Observação 3">
+            </div>
+            <label>"Você comentou que…" <span class="dica">vazio esconde o bloco</span>
+              <input name="desafio_curto" maxlength="140" value="<?= h($pv['desafio_curto']) ?>">
+            </label>
+            <label>Case em destaque
+              <select name="caso">
+                <?php foreach (CRM_PROPOSTA_CASOS as $chave => $rotulo): ?>
+                  <option value="<?= h($chave) ?>"<?= $pv['caso'] === $chave ? ' selected' : '' ?>><?= h($rotulo) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </label>
+            <div class="duas">
+              <label>Assessoria (R$ por mês)<input name="assessoria" inputmode="numeric" value="<?= (int) $pv['assessoria'] ?>"></label>
+              <label>Verba mínima (R$ por mês)<input name="verba_minima" inputmode="numeric" value="<?= (int) $pv['verba_minima'] ?>"></label>
+            </div>
+            <label>Prazo para contrato e acessos<input name="prazo_contrato" maxlength="40" value="<?= h($pv['prazo_contrato']) ?>"></label>
+            <?php if (!$proposta && in_array($lead['status'], ['novo', 'atendimento', 'agendada', 'realizada'], true)): ?>
+              <label class="crit"><input type="checkbox" name="mover" value="1" checked><span><b>Mover para "Proposta enviada"</b><small>O lead muda de etapa no funil.</small></span></label>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-escuro"><?= $proposta ? 'Salvar alterações' : 'Gerar proposta' ?></button>
+          </form>
+        </details>
+
+        <div class="prop-rodape">
+          <?php if ($proposta): ?>
+            <form method="post" data-confirmar="Gerar um link novo? O link que o cliente já recebeu vai parar de funcionar.">
+              <?= crm_csrf_campo() ?>
+              <input type="hidden" name="acao" value="proposta_link"><input type="hidden" name="id" value="<?= (int) $id ?>">
+              <button type="submit" class="linkbtn">Gerar link novo</button>
+            </form>
+            <form method="post">
+              <?= crm_csrf_campo() ?>
+              <input type="hidden" name="acao" value="proposta_ativa"><input type="hidden" name="id" value="<?= (int) $id ?>">
+              <input type="hidden" name="ativa" value="<?= (int) $proposta['ativa'] === 1 ? '0' : '1' ?>">
+              <button type="submit" class="linkbtn"><?= (int) $proposta['ativa'] === 1 ? 'Desativar link' : 'Reativar link' ?></button>
+            </form>
+          <?php endif; ?>
+          <a class="linkbtn" href="proposta-exemplo.php" target="_blank" rel="noopener noreferrer">Ver o modelo com dados de exemplo</a>
+        </div>
+      </section>
+
       <section class="cartao">
         <h2>Pontuação do formulário</h2>
         <div class="placar placar-<?= h($pontos['nivel']) ?>">

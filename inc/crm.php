@@ -449,6 +449,35 @@ function crm_migrar(PDO $db): void
         }
     }
 
+    /* v7: proposta comercial por lead (link secreto, conteúdo da proposta e
+       rastreio de leitura). Tabela nova; nada é apagado. */
+    if ($versao < 7) {
+        $db->exec("CREATE TABLE IF NOT EXISTS propostas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL UNIQUE REFERENCES leads(id) ON DELETE CASCADE,
+            token TEXT NOT NULL UNIQUE,
+            ativa INTEGER NOT NULL DEFAULT 1,
+            obs1 TEXT NOT NULL DEFAULT '',
+            obs2 TEXT NOT NULL DEFAULT '',
+            obs3 TEXT NOT NULL DEFAULT '',
+            desafio_curto TEXT NOT NULL DEFAULT '',
+            caso TEXT NOT NULL DEFAULT 'captacao',
+            assessoria INTEGER NOT NULL DEFAULT 3000,
+            verba_minima INTEGER NOT NULL DEFAULT 3000,
+            prazo_contrato TEXT NOT NULL DEFAULT '5 dias úteis',
+            criado_em TEXT NOT NULL,
+            atualizado_em TEXT NOT NULL,
+            criado_por TEXT NOT NULL DEFAULT '',
+            visitas INTEGER NOT NULL DEFAULT 0,
+            primeira_visita TEXT,
+            ultima_visita TEXT,
+            secao_max INTEGER NOT NULL DEFAULT 0,
+            tempo_total INTEGER NOT NULL DEFAULT 0
+        )");
+        $db->exec('PRAGMA user_version = 7');
+        $versao = 7;
+    }
+
     /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */
     if ((!empty($pontuarDepois) || !empty($repontuarTodos)) && function_exists('crm_pontuar')) {
         $sem = $db->query(!empty($repontuarTodos) ? 'SELECT * FROM leads' : "SELECT * FROM leads WHERE classe = ''")->fetchAll();
@@ -748,8 +777,8 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=8">
-<script src="assets/admin.js?v=3" defer></script>
+<link rel="stylesheet" href="assets/admin.css?v=9">
+<script src="assets/admin.js?v=4" defer></script>
 </head>
 <body class="<?= h($classe) ?>">
 <?php if ($usuario): ?>
@@ -808,3 +837,4 @@ function crm_link_whatsapp(string $numero, string $mensagem = ''): string
 
 require __DIR__ . '/funil.php';
 require __DIR__ . '/integracoes.php';
+require __DIR__ . '/proposta.php';

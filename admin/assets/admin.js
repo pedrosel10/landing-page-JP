@@ -195,3 +195,35 @@ document.addEventListener('submit', function (evento) {
       });
   });
 })();
+
+/* Proposta: botão "Copiar link" (com alternativa para navegador sem área de transferência) */
+document.addEventListener('click', function (evento) {
+  var botao = evento.target.closest ? evento.target.closest('[data-copiar]') : null;
+  if (!botao) {
+    return;
+  }
+  var texto = botao.getAttribute('data-copiar');
+  var original = botao.textContent;
+  function pronto() {
+    botao.textContent = 'Copiado ✓';
+    setTimeout(function () { botao.textContent = original; }, 1800);
+  }
+  function alternativa() {
+    var campo = document.createElement('textarea');
+    campo.value = texto;
+    campo.setAttribute('readonly', '');
+    campo.className = 'oculto';
+    document.body.appendChild(campo);
+    campo.select();
+    try {
+      document.execCommand('copy');
+      pronto();
+    } catch (erro) { /* o link continua visível para copiar à mão */ }
+    document.body.removeChild(campo);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(pronto, alternativa);
+  } else {
+    alternativa();
+  }
+});

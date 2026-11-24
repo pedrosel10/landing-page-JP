@@ -356,3 +356,29 @@ button:disabled{cursor:not-allowed}
 .pi-parcial .pi-ic{background:#F6E7C8;color:#8A5A12}
 .pi-nao .pi-ic{background:#F3DEDA;color:var(--wine-h)}
 .pi-sem .pi-ic{background:var(--cream-2);color:var(--mute)}
+
+/* Proposta do lead (link secreto, conteúdo e leitura do cliente) */
+.proposta-cartao{border-color:rgba(122,46,51,.35);box-shadow:inset 3px 0 0 var(--wine)}
+.prop-intro{margin:0 0 4px;font-size:14px;color:var(--ink-2)}
+.prop-link{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
+.prop-link code{flex:1;min-width:0;display:flex;align-items:center;padding:8px 10px;border-radius:7px;background:#fff;border:1px solid var(--line);font:500 12px/1.35 var(--mono);word-break:break-all;user-select:all}
+.prop-acoes{display:flex;flex-wrap:wrap;gap:8px}
+.prop-off{margin:0 0 10px;padding:10px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn);font-size:14px}
+.prop-leitura{margin-top:16px}
+.prop-progresso{display:block;width:100%;height:6px;margin-top:12px;-webkit-appearance:none;appearance:none;border:0;border-radius:99px;background:var(--line-2);overflow:hidden}
+.prop-progresso::-webkit-progress-bar{background:var(--line-2);border-radius:99px}
+.prop-progresso::-webkit-progress-value{background:var(--wine);border-radius:99px}
+.prop-progresso::-moz-progress-bar{background:var(--wine);border-radius:99px}
+.prop-nao-abriu{margin:14px 0 0;font-size:14px;color:var(--mute)}
+.prop-editar{margin-top:16px;border-top:1px solid var(--line-2);padding-top:12px}
+.prop-editar summary{font-weight:600;font-size:14px;padding:4px 0}
+.prop-form{margin-top:12px}
+.prop-form .btn{justify-self:start}
+.prop-form .dica{font-size:12.5px;color:var(--mute);font-weight:400}
+.prop-form .obs{display:grid;gap:6px}
+.prop-form .crit{display:grid;font-weight:400}
+.prop-rodape{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line-2)}
+.prop-rodape form{margin:0}
+.prop-rodape .linkbtn{padding:6px 0;font-size:13px;color:var(--wine);background:none}
+.prop-rodape .linkbtn:hover{background:none;text-decoration:underline}
+@media (max-width:560px){.prop-link{flex-direction:column}}
