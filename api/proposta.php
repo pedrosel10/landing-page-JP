@@ -46,13 +46,20 @@ if (crm_contar_tentativas('proposta', $ip, 3600) >= 120) {
 }
 crm_registrar_tentativa('proposta', $ip);
 
-$proposta = crm_proposta_por_token((string) ($dados['t'] ?? ''));
-if (!$proposta) {
-    responder(404);
-}
+$token = (string) ($dados['t'] ?? '');
 $evento = ($dados['ev'] ?? '') === 'abriu' ? 'abriu' : 'leu';
 $secao = (string) ($dados['secao'] ?? '');
 $segundos = is_numeric($dados['seg'] ?? null) ? (int) $dados['seg'] : 0;
 
+/* Link da versão genérica: soma as aberturas de todo mundo que recebeu */
+if (crm_proposta_geral_por_token($token)) {
+    crm_proposta_geral_registrar($evento, $segundos);
+    responder(200);
+}
+
+$proposta = crm_proposta_por_token($token);
+if (!$proposta) {
+    responder(404);
+}
 crm_proposta_registrar($proposta, $evento, $secao, $segundos);
 responder(200);

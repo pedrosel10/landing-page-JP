@@ -478,6 +478,31 @@ function crm_migrar(PDO $db): void
         $versao = 7;
     }
 
+    /* v8: todos os dados personalizados da proposta podem ser editados na ficha
+       (nome, empresa, dados do formulário e data). As propostas que já existiam
+       recebem os dados atuais do lead, então nada muda na página delas. */
+    if ($versao < 8) {
+        $db->exec('BEGIN');
+        $existentes = array_column($db->query('PRAGMA table_info(propostas)')->fetchAll(), 'name');
+        foreach (['nome', 'empresa', 'segmento', 'faturamento', 'verba_atual', 'atendimento', 'desafio', 'data_reuniao'] as $coluna) {
+            if (!in_array($coluna, $existentes, true)) {
+                $db->exec("ALTER TABLE propostas ADD COLUMN $coluna TEXT NOT NULL DEFAULT ''");
+            }
+        }
+        if (function_exists('crm_proposta_padrao_lead')) {
+            $up = $db->prepare('UPDATE propostas SET nome = ?, empresa = ?, segmento = ?, faturamento = ?, verba_atual = ?,
+                atendimento = ?, desafio = ?, data_reuniao = ? WHERE id = ?');
+            foreach ($db->query('SELECT p.id AS pid, l.* FROM propostas p JOIN leads l ON l.id = p.lead_id')->fetchAll() as $l) {
+                $d = crm_proposta_padrao_lead($l);
+                $up->execute([$d['nome'], $d['empresa'], $d['segmento'], $d['faturamento'], $d['verba_atual'],
+                    $d['atendimento'], $d['desafio'], $d['data_reuniao'], $l['pid']]);
+            }
+        }
+        $db->exec('PRAGMA user_version = 8');
+        $db->exec('COMMIT');
+        $versao = 8;
+    }
+
     /* Pontua os leads que ainda não têm pontuação (os antigos, na primeira vez) */
     if ((!empty($pontuarDepois) || !empty($repontuarTodos)) && function_exists('crm_pontuar')) {
         $sem = $db->query(!empty($repontuarTodos) ? 'SELECT * FROM leads' : "SELECT * FROM leads WHERE classe = ''")->fetchAll();
@@ -777,7 +802,7 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/admin.css?v=9">
+<link rel="stylesheet" href="assets/admin.css?v=10">
 <script src="assets/admin.js?v=4" defer></script>
 </head>
 <body class="<?= h($classe) ?>">
@@ -787,6 +812,7 @@ function crm_topo(string $titulo, ?array $usuario = null, string $classe = ''): 
   <nav class="bar-nav">
     <a href="index.php">Funil<?php if ($naoVistos): ?> <span class="contador" title="Leads ainda não vistos"><?= $naoVistos ?></span><?php endif; ?></a>
     <a href="lista.php">Lista</a>
+    <a href="proposta-generica.php">Propostas</a>
     <a href="integracoes.php">Integrações</a>
     <a href="conta.php">Conta</a>
     <form method="post" action="sair.php"><?= crm_csrf_campo() ?><button type="submit" class="linkbtn">Sair</button></form>

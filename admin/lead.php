@@ -338,6 +338,24 @@ crm_topo($lead['nome'], $usuario);
           <form method="post" class="form prop-form">
             <?= crm_csrf_campo() ?>
             <input type="hidden" name="acao" value="proposta_salvar"><input type="hidden" name="id" value="<?= (int) $id ?>">
+            <fieldset class="prop-grupo">
+              <legend>Dados do cliente na página <span class="dica">vieram do formulário; mude o que quiser</span></legend>
+              <div class="duas">
+                <label>Nome de quem recebe<input name="nome" maxlength="60" value="<?= h($pv['nome']) ?>" placeholder="Primeiro nome"></label>
+                <label>Empresa<input name="empresa" maxlength="120" value="<?= h($pv['empresa']) ?>"></label>
+              </div>
+              <div class="duas">
+                <label>Segmento<input name="segmento" maxlength="80" value="<?= h($pv['segmento']) ?>"></label>
+                <label>Data da reunião<input type="date" name="data_reuniao" value="<?= h($pv['data_reuniao']) ?>"></label>
+              </div>
+              <div class="duas">
+                <label>Faturamento mensal<input name="faturamento" maxlength="80" value="<?= h($pv['faturamento']) ?>"></label>
+                <label>Anúncios hoje<input name="verba_atual" maxlength="80" value="<?= h($pv['verba_atual']) ?>"></label>
+              </div>
+              <label>Quem atende os leads<input name="atendimento" maxlength="120" value="<?= h($pv['atendimento']) ?>"></label>
+              <label>Principal desafio<input name="desafio" maxlength="140" value="<?= h($pv['desafio']) ?>"></label>
+              <p class="dica">Campo vazio some da ficha "O seu cenário" (ficha e observações vazias tiram a seção inteira). Nome e empresa vazios voltam para os do lead; data vazia usa a da reunião ou a de hoje.</p>
+            </fieldset>
             <div class="obs">
               <label for="obs1">O que vimos antes da conversa <span class="dica">até 3 observações, aparecem como bilhetes</span></label>
               <input id="obs1" name="obs1" maxlength="220" value="<?= h($pv['obs1']) ?>" placeholder="Ex.: os anúncios falam de preço, não do motivo para escolher vocês">
@@ -380,7 +398,8 @@ crm_topo($lead['nome'], $usuario);
               <button type="submit" class="linkbtn"><?= (int) $proposta['ativa'] === 1 ? 'Desativar link' : 'Reativar link' ?></button>
             </form>
           <?php endif; ?>
-          <a class="linkbtn" href="proposta-exemplo.php" target="_blank" rel="noopener noreferrer">Ver o modelo com dados de exemplo</a>
+          <a class="linkbtn" href="proposta-generica.php?abrir=1" target="_blank" rel="noopener noreferrer">Abrir a versão genérica</a>
+          <a class="linkbtn" href="proposta-generica.php">Link da genérica</a>
         </div>
       </section>
 

@@ -27,8 +27,8 @@ crm_proposta_mostrar([
     'caso'           => 'captacao',
     'data'           => crm_data_extenso(null),
     'prazo_contrato' => '5 dias úteis',
-    'assessoria'     => 3000,
-    'verba_minima'   => 3000,
+    'assessoria'     => 4000,
+    'verba_minima'   => 4000,
     'whatsapp'       => CRM_PROPOSTA_WHATSAPP,
     'rastreio'       => null,
 ], 'Modelo de proposta · J.P.Growth');

@@ -8,6 +8,17 @@
 require __DIR__ . '/../inc/crm.php';
 
 $token = (string) ($_GET['t'] ?? '');
+$rastreio = isset($_GET['previa']) ? null : ['t' => $token, 'url' => '../api/proposta.php'];
+
+/* Versão genérica (sem dados de cliente), com o link da tela "Proposta genérica" */
+$geral = crm_proposta_geral_por_token($token);
+if ($geral) {
+    $dados = crm_proposta_geral_dados($geral);
+    $dados['rastreio'] = $rastreio;
+    crm_proposta_mostrar($dados, 'Proposta · J.P.Growth');
+    exit;
+}
+
 $proposta = crm_proposta_por_token($token);
 $lead = null;
 if ($proposta) {
@@ -35,5 +46,5 @@ if (!$proposta || !$lead) {
 }
 
 $dados = crm_proposta_dados($proposta, $lead);
-$dados['rastreio'] = isset($_GET['previa']) ? null : ['t' => $token, 'url' => '../api/proposta.php'];
-crm_proposta_mostrar($dados, 'Proposta · ' . $lead['empresa'] . ' · J.P.Growth');
+$dados['rastreio'] = $rastreio;
+crm_proposta_mostrar($dados, 'Proposta · ' . $dados['empresa'] . ' · J.P.Growth');

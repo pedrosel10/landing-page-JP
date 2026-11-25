@@ -80,15 +80,34 @@ function crm_proposta_por_token(string $token): ?array
     return $p ?: null;
 }
 
+/* Dados personalizados como vêm do formulário do lead (rótulos legíveis).
+   Viram o ponto de partida da proposta; depois, tudo pode ser editado na ficha. */
+function crm_proposta_padrao_lead(array $lead): array
+{
+    $partes = preg_split('/\s+/u', trim((string) $lead['nome'])) ?: [''];
+    $faturamento = CRM_FATURAMENTO[$lead['faturamento'] ?? ''] ?? '';
+    $verba = CRM_INVESTIMENTO[$lead['investimento'] ?? ''] ?? '';
+    return [
+        'nome'         => (string) $partes[0],
+        'empresa'      => (string) $lead['empresa'],
+        'segmento'     => (string) ($lead['segmento'] ?? ''),
+        'faturamento'  => (string) preg_replace('/ por mês$/u', '', $faturamento),
+        'verba_atual'  => (string) preg_replace('/ em anúncios$/u', '', $verba),
+        'atendimento'  => CRM_ATENDIMENTO[$lead['atendimento'] ?? ''] ?? '',
+        'desafio'      => CRM_DESAFIO[$lead['desafio'] ?? ''] ?? '',
+        'data_reuniao' => !empty($lead['reuniao_em']) ? substr((string) $lead['reuniao_em'], 0, 10) : '',
+    ];
+}
+
 /* Sugestão para o formulário de um lead que ainda não tem proposta */
 function crm_proposta_sugestao(array $lead): array
 {
-    return [
+    return crm_proposta_padrao_lead($lead) + [
         'obs1' => '', 'obs2' => '', 'obs3' => '',
         'desafio_curto'  => CRM_PROPOSTA_DESAFIO_FALA[$lead['desafio']] ?? '',
         'caso'           => CRM_PROPOSTA_CASO_SEGMENTO[$lead['segmento']] ?? 'captacao',
-        'assessoria'     => 3000,
-        'verba_minima'   => 3000,
+        'assessoria'     => 4000,
+        'verba_minima'   => 4000,
         'prazo_contrato' => '5 dias úteis',
     ];
 }
@@ -101,14 +120,23 @@ function crm_proposta_campos(array $post): array
         return ($n >= 100 && $n <= 1000000) ? $n : $padrao;
     };
     $caso = (string) ($post['caso'] ?? '');
+    $data = (string) ($post['data_reuniao'] ?? '');
     return [
+        'nome'           => crm_texto($post['nome'] ?? '', 60),
+        'empresa'        => crm_texto($post['empresa'] ?? '', 120),
+        'segmento'       => crm_texto($post['segmento'] ?? '', 80),
+        'faturamento'    => crm_texto($post['faturamento'] ?? '', 80),
+        'verba_atual'    => crm_texto($post['verba_atual'] ?? '', 80),
+        'atendimento'    => crm_texto($post['atendimento'] ?? '', 120),
+        'desafio'        => crm_texto($post['desafio'] ?? '', 140),
+        'data_reuniao'   => preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) ? $data : '',
         'obs1'           => crm_texto($post['obs1'] ?? '', 220),
         'obs2'           => crm_texto($post['obs2'] ?? '', 220),
         'obs3'           => crm_texto($post['obs3'] ?? '', 220),
         'desafio_curto'  => rtrim(crm_texto($post['desafio_curto'] ?? '', 140), '. '),
         'caso'           => isset(CRM_PROPOSTA_CASOS[$caso]) ? $caso : 'captacao',
-        'assessoria'     => $reais($post['assessoria'] ?? '', 3000),
-        'verba_minima'   => $reais($post['verba_minima'] ?? '', 3000),
+        'assessoria'     => $reais($post['assessoria'] ?? '', 4000),
+        'verba_minima'   => $reais($post['verba_minima'] ?? '', 4000),
         'prazo_contrato' => crm_texto($post['prazo_contrato'] ?? '', 40) ?: '5 dias úteis',
     ];
 }
@@ -170,36 +198,40 @@ function crm_proposta_url(string $token, bool $previa = false): string
     return (crm_https() ? 'https://' : 'http://') . $host . $base . '/proposta/?t=' . $token . ($previa ? '&previa=1' : '');
 }
 
-/* "2026-11-24 15:00:00" → "24 de novembro de 2026" (sem data: hoje) */
+/* "2026-11-24 15:00:00" ou "2026-11-24" → "24 de novembro de 2026" (sem data: hoje) */
 function crm_data_extenso(?string $data): string
 {
     $tz = new DateTimeZone('America/Sao_Paulo');
-    $d = $data ? DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data, $tz) : false;
+    $d = $data ? DateTimeImmutable::createFromFormat('Y-m-d H:i:s', substr($data, 0, 10) . ' 12:00:00', $tz) : false;
     if (!$d) {
         $d = new DateTimeImmutable('now', $tz);
     }
     return (int) $d->format('j') . ' de ' . CRM_PROPOSTA_MESES[(int) $d->format('n') - 1] . ' de ' . $d->format('Y');
 }
 
-/* Dados que a página recebe. Só o necessário: nada de telefone, e-mail ou origem. */
+/* Dados que a página recebe. Só o necessário: nada de telefone, e-mail ou origem.
+   Os campos da ficha ("O seu cenário") que estiverem vazios somem da página;
+   nome e empresa vazios voltam para o que está no lead. */
 function crm_proposta_dados(array $p, array $lead): array
 {
-    $partes = preg_split('/\s+/u', trim((string) $lead['nome'])) ?: [''];
-    $faturamento = CRM_FATURAMENTO[$lead['faturamento']] ?? '';
-    $verba = CRM_INVESTIMENTO[$lead['investimento']] ?? '';
+    $padrao = crm_proposta_padrao_lead($lead);
+    $texto = function (string $campo) use ($p): string {
+        return trim((string) ($p[$campo] ?? ''));
+    };
     return [
         'exemplo'        => false,
-        'nome'           => $partes[0],
-        'empresa'        => (string) $lead['empresa'],
-        'segmento'       => $lead['segmento'] !== '' ? (string) $lead['segmento'] : 'Não informado',
-        'faturamento'    => $faturamento !== '' ? preg_replace('/ por mês$/u', '', $faturamento) : 'Não informado',
-        'verba_atual'    => $verba !== '' ? preg_replace('/ em anúncios$/u', '', $verba) : 'Não informado',
-        'atendimento'    => CRM_ATENDIMENTO[$lead['atendimento']] ?? 'Não informado',
-        'desafio'        => CRM_DESAFIO[$lead['desafio']] ?? 'Não informado',
+        'generica'       => false,
+        'nome'           => $texto('nome') !== '' ? $texto('nome') : $padrao['nome'],
+        'empresa'        => $texto('empresa') !== '' ? $texto('empresa') : $padrao['empresa'],
+        'segmento'       => $texto('segmento'),
+        'faturamento'    => $texto('faturamento'),
+        'verba_atual'    => $texto('verba_atual'),
+        'atendimento'    => $texto('atendimento'),
+        'desafio'        => $texto('desafio'),
         'desafio_curto'  => (string) $p['desafio_curto'],
         'obs'            => array_values(array_filter([(string) $p['obs1'], (string) $p['obs2'], (string) $p['obs3']], 'strlen')),
         'caso'           => (string) $p['caso'],
-        'data'           => crm_data_extenso($lead['reuniao_em'] ?: $p['criado_em']),
+        'data'           => crm_data_extenso($texto('data_reuniao') !== '' ? $texto('data_reuniao') : ($lead['reuniao_em'] ?: $p['criado_em'])),
         'prazo_contrato' => (string) $p['prazo_contrato'],
         'assessoria'     => (int) $p['assessoria'],
         'verba_minima'   => (int) $p['verba_minima'],
@@ -280,4 +312,95 @@ function crm_proposta_tempo(int $segundos): string
     }
     $min = (int) round($segundos / 60);
     return $min < 60 ? $min . ' min' : floor($min / 60) . ' h ' . ($min % 60) . ' min';
+}
+
+/* ------------------------------------------------------------ proposta genérica
+   A mesma página sem dados de cliente: sem a seção "O seu cenário", sem nome de
+   empresa e sem a frase "Você comentou que…". Serve para quem não passou pelo
+   formulário, indicações e eventos. Tem link próprio (também secreto), ajustes
+   próprios e contagem de aberturas, guardados na tabela config (proposta_geral_*). */
+
+function crm_proposta_geral(): array
+{
+    return [
+        'token'          => crm_config('proposta_geral_token'),
+        'ativa'          => crm_config('proposta_geral_ativa', '1') === '1',
+        'caso'           => crm_config('proposta_geral_caso', 'educacao-pos'),
+        'assessoria'     => (int) crm_config('proposta_geral_assessoria', '4000'),
+        'verba_minima'   => (int) crm_config('proposta_geral_verba', '4000'),
+        'prazo_contrato' => crm_config('proposta_geral_prazo', '5 dias úteis'),
+        'visitas'        => (int) crm_config('proposta_geral_visitas', '0'),
+        'ultima_visita'  => crm_config('proposta_geral_ultima'),
+        'tempo_total'    => (int) crm_config('proposta_geral_tempo', '0'),
+    ];
+}
+
+/* Cria o link da genérica na primeira vez que alguém abre a tela dela no painel */
+function crm_proposta_geral_garantir(): array
+{
+    if (crm_config('proposta_geral_token') === '') {
+        crm_config_salvar(['proposta_geral_token' => crm_proposta_token(), 'proposta_geral_ativa' => '1']);
+    }
+    return crm_proposta_geral();
+}
+
+function crm_proposta_geral_por_token(string $token): ?array
+{
+    $g = crm_proposta_geral();
+    if (!$g['ativa'] || $g['token'] === '' || !preg_match('/^[a-f0-9]{32}$/', $token)) {
+        return null;
+    }
+    return hash_equals($g['token'], $token) ? $g : null;
+}
+
+function crm_proposta_geral_dados(array $g): array
+{
+    return [
+        'exemplo'        => false,
+        'generica'       => true,
+        'nome'           => '',
+        'empresa'        => 'sua empresa',
+        'segmento'       => '', 'faturamento' => '', 'verba_atual' => '', 'atendimento' => '', 'desafio' => '',
+        'desafio_curto'  => '',
+        'obs'            => [],
+        'caso'           => isset(CRM_PROPOSTA_CASOS[$g['caso']]) ? $g['caso'] : 'educacao-pos',
+        'data'           => crm_data_extenso(null),
+        'prazo_contrato' => $g['prazo_contrato'],
+        'assessoria'     => $g['assessoria'],
+        'verba_minima'   => $g['verba_minima'],
+        'whatsapp'       => CRM_PROPOSTA_WHATSAPP,
+    ];
+}
+
+function crm_proposta_geral_salvar(array $post): void
+{
+    $c = crm_proposta_campos($post);
+    crm_config_salvar([
+        'proposta_geral_caso'       => $c['caso'],
+        'proposta_geral_assessoria' => $c['assessoria'],
+        'proposta_geral_verba'      => $c['verba_minima'],
+        'proposta_geral_prazo'      => $c['prazo_contrato'],
+    ]);
+}
+
+function crm_proposta_geral_novo_link(): void
+{
+    crm_config_salvar(['proposta_geral_token' => crm_proposta_token(), 'proposta_geral_ativa' => '1']);
+}
+
+function crm_proposta_geral_ativar(bool $ativa): void
+{
+    crm_config_salvar(['proposta_geral_ativa' => $ativa ? '1' : '0']);
+}
+
+/* Aberturas e tempo somados de todo mundo que recebeu o link genérico */
+function crm_proposta_geral_registrar(string $evento, int $segundos): void
+{
+    $valores = ['proposta_geral_ultima' => crm_agora()];
+    if ($evento === 'abriu') {
+        $valores['proposta_geral_visitas'] = (int) crm_config('proposta_geral_visitas', '0') + 1;
+    } else {
+        $valores['proposta_geral_tempo'] = (int) crm_config('proposta_geral_tempo', '0') + max(0, min($segundos, 3600));
+    }
+    crm_config_salvar($valores);
 }

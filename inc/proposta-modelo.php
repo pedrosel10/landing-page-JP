@@ -654,7 +654,9 @@ main{padding-top:var(--hdr);overflow-x:clip}
 .inv-card.verba .mono,.inv-card.verba p,.inv-card.verba .de,.inv-card.verba .valor small{color:var(--on-dark-mute)}
 .inv-card.total{background:var(--wine);border-color:var(--wine);color:#F6F1EA}
 .inv-card.total .mono{color:rgba(246,241,234,.75)}
-.inv-card.total .valor{font-size:clamp(40px,4.4vw,62px)}
+.inv-card.total .valor{font-size:clamp(40px,4.4vw,62px);color:#F6F1EA}
+.inv-card.time .valor{color:var(--ink)}
+.inv-card.verba .valor{color:var(--on-dark)}
 .barra{display:flex;height:42px;border-radius:10px;overflow:hidden;margin-top:6px;font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
 .barra span{display:flex;align-items:center;padding:0 12px;flex:1}
 .barra span:first-child{background:#F6F1EA;color:var(--wine)}
@@ -705,6 +707,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
 .final-t .serif{display:block;font-size:clamp(46px,8vw,120px);line-height:.95;color:var(--wine)!important;margin-top:4px}
 .final-acao{display:grid;justify-items:end;gap:20px;text-align:right}
 .final-acao p{color:var(--ink-2);max-width:30ch}
+.final-acao .final-fala{color:var(--wine);font-size:clamp(24px,2.2vw,30px);max-width:18ch}
 @media (max-width:900px){
   .passos{grid-template-columns:1fr}
   .passo-seta{width:100%;height:44px}
@@ -785,7 +788,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
   <div class="wrap">
     <h1 class="sr">O sistema por trás do seu crescimento</h1>
     <div class="hero-l1">
-      <p class="eyebrow">Reunião estratégica · <span data-campo="empresa"></span></p>
+      <p class="eyebrow" data-geral="Proposta de operação · J.P.Growth">Reunião estratégica · <span data-campo="empresa"></span></p>
       <div class="display hero-h1" aria-hidden="true">O sistema</div>
     </div>
     <div class="hero-meio">
@@ -800,7 +803,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
         <div class="estrela-hero" id="estrelaHero"><svg viewBox="0 0 35 35"><use href="#estrela"/></svg></div>
       </div>
       <div class="hero-col dir">
-        <p>Proposta de operação de marketing preparada para <b data-campo="empresa"></b>.</p>
+        <p data-geral="Proposta de operação de marketing para empresas prontas para crescer.">Proposta de operação de marketing preparada para <b data-campo="empresa"></b>.</p>
         <i class="traco"></i>
         <p class="mono mini">Com João Paulo B. Ferreira<br>e Pedro Selestrim</p>
       </div>
@@ -812,10 +815,10 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
       <div class="mono hero-acoes">Estratégia<br>Tráfego<br>Criativo<br>Venda</div>
     </div>
     <div class="hero-rod mono">
-      <span>Para <b data-campo="nome"></b> · <b data-campo="empresa"></b></span>
+      <span data-geral="Assessoria de marketing completa">Para <b data-campo="nome"></b> · <b data-campo="empresa"></b></span>
       <span data-campo="data"></span>
       <span>J.P.Growth · assessoria completa</span>
-      <span class="rolar"><i></i>Role ou use ↓ para avançar</span>
+      <span class="rolar"><i></i>Apresentação ao vivo</span>
     </div>
   </div>
 </section>
@@ -1115,7 +1118,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
       <figure class="polaroid rv" style="--r:-2.4deg">
         <i class="fita"></i>
         <button class="foto-btn" type="button" id="dBtn"><img id="dImg" alt="" loading="lazy"></button>
-        <figcaption class="mono"><span id="dCap"></span><span>Toque para ampliar</span></figcaption>
+        <figcaption class="mono"><span id="dCap"></span><span>Clique para ampliar</span></figcaption>
       </figure>
       <div class="destaque-txt rv" style="--d:.12s">
         <span class="carimbo">Dados reais</span>
@@ -1126,7 +1129,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
         <p class="hand d-hand"><svg class="seta" viewBox="0 0 90 70" aria-hidden="true"><path pathLength="1" d="M84 8 C 62 6, 30 16, 14 56"/><path pathLength="1" d="M14 56 L 10 40 M14 56 L 28 48"/></svg>escolhemos esse porque é o mais parecido com o seu caso</p>
       </div>
     </div>
-    <div class="obras-head mono"><span>Outros resultados</span><span>Toque para ver o print real</span></div>
+    <div class="obras-head mono"><span>Outros resultados</span><span>Clique para ver o print real</span></div>
     <div class="obras" id="obras"></div>
   </div>
   <div class="wrap pad depos-wrap">
@@ -1253,19 +1256,19 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
     <div class="inv-bento">
       <article class="inv-card time rv">
         <p class="mono">Assessoria J.P.Growth</p>
-        <p class="valor" id="vAssessoria">R$ 3.000<small>/mês</small></p>
+        <p class="valor" id="vAssessoria">R$ 4.000<small>/mês</small></p>
         <p>O time inteiro trabalhando na sua operação, conduzido pelos sócios.</p>
         <div class="inv-chips"><span>Estratégia</span><span>Tráfego pago</span><span>Copy</span><span>Roteiros</span><span>Criativos</span><span>Landing pages</span><span>Identidade</span><span>Dados</span><span>Relatório + dashboard</span></div>
       </article>
       <article class="inv-card verba rv" style="--d:.1s">
         <p class="mono">Verba de anúncios</p>
         <p class="de">a partir de</p>
-        <p class="valor" id="vVerbaMin" style="margin-top:-4px">R$ 3.000<small>/mês</small></p>
+        <p class="valor" id="vVerbaMin" style="margin-top:-4px">R$ 4.000<small>/mês</small></p>
         <p>Vai direto para Meta e Google, em nome da sua empresa. Sem teto: você decide a velocidade.</p>
       </article>
       <article class="inv-card total rv" style="--d:.2s">
         <p class="mono">Para começar</p>
-        <p class="valor" id="vTotal">R$ 6 mil<small style="color:rgba(246,241,234,.7)">/mês</small></p>
+        <p class="valor" id="vTotal">R$ 8 mil<small style="color:rgba(246,241,234,.7)">/mês</small></p>
         <div class="barra"><span>Time</span><span>Anúncios</span></div>
       </article>
     </div>
@@ -1273,21 +1276,21 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
       <div class="ritmo-esq">
         <p class="eyebrow">Você escolhe a velocidade</p>
         <h3 class="h3">Quanto mais verba, <em>mais rápido a gente aprende.</em></h3>
-        <label for="verba">Verba por mês <output id="verbaOut" for="verba">R$ 3.000</output></label>
-        <input type="range" id="verba" min="3000" max="20000" step="500" value="3000" aria-describedby="nivelDesc">
-        <div class="escala"><span>R$ 3 mil</span><span>R$ 10 mil</span><span>R$ 20 mil+</span></div>
+        <label for="verba">Verba por mês <output id="verbaOut" for="verba">R$ 4.000</output></label>
+        <input type="range" id="verba" min="4000" max="20000" step="500" value="4000" aria-describedby="nivelDesc">
+        <div class="escala"><span>R$ 4 mil</span><span>R$ 10 mil</span><span>R$ 20 mil+</span></div>
       </div>
       <div class="ritmo-dir">
         <div class="nivel-top"><p class="nivel-nome" id="nivelNome">Começar</p><div class="medidor" id="medidor"><i class="on"></i><i></i><i></i></div></div>
         <p class="nivel-desc" id="nivelDesc">Um canal principal (Meta ou Google, conforme o negócio). Foco em validar oferta e criativo.</p>
         <div class="conta-mes">
-          <div><span class="mono">Investimento do mês</span><b id="contaTotal">R$ 6.000</b></div>
-          <small id="contaQuebra">R$ 3.000 time + R$ 3.000 anúncios</small>
+          <div><span class="mono">Investimento do mês</span><b id="contaTotal">R$ 8.000</b></div>
+          <small id="contaQuebra">R$ 4.000 time + R$ 4.000 anúncios</small>
         </div>
       </div>
     </div>
     <details class="porque">
-      <summary>Por que no mínimo R$ 3 mil de verba?</summary>
+      <summary>Por que no mínimo R$ 4 mil de verba?</summary>
       <p>Abaixo disso, as campanhas geram poucos dados por semana, o algoritmo aprende devagar e cada teste demora demais para dar resposta. Você pagaria a assessoria por meses sem saber o que funciona. Preferimos começar certo a começar barato. Para ter uma ideia: um cliente de e-commerce investiu R$ 5,8 mil num mês e vendeu R$ 97 mil.</p>
     </details>
   </div>
@@ -1311,8 +1314,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
       <h2 class="final-t"><span class="display">Vamos construir o sistema</span> <span class="serif">da <span data-campo="empresa"></span>?</span></h2>
       <div class="final-acao rv">
         <svg class="selo-giro" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="cg2" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs><text><textPath href="#cg2" textLength="474" lengthAdjust="spacing">VENDER MAIS HOJE ✦ VALER MAIS AMANHÃ ✦</textPath></text><use class="miolo" href="#estrela" x="80" y="80" width="40" height="40"/></svg>
-        <p>Ficou alguma dúvida? Fale com a gente e resolvemos antes de começar.</p>
-        <a class="btn" id="ctaFinal" href="mailto:contato@pedroselestrim.com">Quero começar <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        <p class="hand final-fala">fazendo sentido, a gente já combina os próximos passos agora, nesta conversa</p>
       </div>
     </div>
   </div>
@@ -1355,7 +1357,7 @@ input[type=range]:focus-visible{outline:2px solid var(--wine);outline-offset:4px
   <span class="mono">↑ ↓</span>
   <button type="button" id="ctlProx" aria-label="Avançar uma etapa"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M4 9l4 4 4-4"/></svg></button>
 </div>
-<p class="aviso-exemplo mono">Dados de exemplo · não enviar</p>
+<p class="aviso-exemplo mono">Dados de exemplo</p>
 
 <dialog class="lb" id="lb">
   <button class="lb-x" type="button" id="lbX" aria-label="Fechar">×</button>
@@ -1405,15 +1407,22 @@ const FRENTES = [
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 
   /* ---------- 1. Preenche os dados do cliente (sempre como texto) ---------- */
+  const tira = s => { const n = $(s); if (n) n.remove(); };
+  if (PROPOSTA.generica) {
+    /* Versão genérica: sem a seção do cliente, sem "você comentou" e sem nomes */
+    tira('#cenario'); tira('.prob-voce'); tira('.d-hand');
+    $$('[data-geral]').forEach(n => { n.textContent = n.dataset.geral; });
+  }
+  /* Ficha "O seu cenário": linha vazia some; ficha sem linhas e sem notas tira a seção */
+  $$('.ficha dd[data-campo]').forEach(dd => { const v = PROPOSTA[dd.dataset.campo]; if (v == null || v === '') dd.parentElement.remove(); });
+  if ($('.ficha') && !$$('.ficha dl > div').length) tira('.ficha');
   $$('[data-campo]').forEach(n => { const v = PROPOSTA[n.dataset.campo]; if (v != null && v !== '') n.textContent = v; });
   const obs = (PROPOSTA.obs || []).filter(Boolean);
   $$('[data-obs]').forEach(n => { const v = obs[+n.dataset.obs]; if (v) n.textContent = v; else n.closest('.nota').remove(); });
-  if (!obs.length) { $('.notas').remove(); $('.cen-grid').classList.add('sem-notas'); }
-  if (!PROPOSTA.desafio_curto) $('.prob-voce').remove();
+  if (!obs.length) { tira('.notas'); if ($('.cen-grid')) $('.cen-grid').classList.add('sem-notas'); }
+  if ($('#cenario') && !$('.ficha') && !$('.nota')) tira('#cenario');
+  if (!PROPOSTA.desafio_curto) tira('.prob-voce');
   if (PROPOSTA.exemplo) document.documentElement.classList.add('is-exemplo');
-  const cta = $('#ctaFinal');
-  if (PROPOSTA.whatsapp) cta.href = 'https://wa.me/' + String(PROPOSTA.whatsapp).replace(/\D/g, '') + '?text=' + encodeURIComponent('Olá! Vi a proposta da J.P.Growth e quero começar.');
-  else cta.href = 'mailto:contato@pedroselestrim.com?subject=' + encodeURIComponent('Quero começar com a J.P.Growth');
 
   /* ---------- 2. Revelação no scroll ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => {
